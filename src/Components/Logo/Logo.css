@@ -1,0 +1,92 @@
+/* ═══════════════  LOGO COMPONENT  ═══════════════ */
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  user-select: none;
+  transition: transform 0.2s ease;
+}
+
+.logo:hover {
+  transform: translateY(-1px);
+}
+
+/* ── Icon ── */
+.logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logo-svg {
+  transition: transform 0.3s ease;
+}
+
+.logo:hover .logo-svg {
+  transform: rotate(8deg) scale(1.05);
+}
+
+/* ── Wordmark ── */
+.logo-wordmark {
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+.logo-word-primary {
+  color: #001e00;
+}
+
+.logo-word-accent {
+  background: linear-gradient(135deg, #14a800, #6fda44);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ═══════════════  SIZES  ═══════════════ */
+
+/* Small — footer, compact spaces */
+.logo--sm .logo-svg {
+  width: 28px;
+  height: 28px;
+}
+.logo--sm .logo-wordmark {
+  font-size: 20px;
+}
+
+/* Medium — navbar (default) */
+.logo--md .logo-svg {
+  width: 36px;
+  height: 36px;
+}
+.logo--md .logo-wordmark {
+  font-size: 26px;
+}
+
+/* Large — auth side panels, hero sections */
+.logo--lg .logo-svg {
+  width: 44px;
+  height: 44px;
+}
+.logo--lg .logo-wordmark {
+  font-size: 32px;
+}
+
+/* ═══════════════  VARIANTS  ═══════════════ */
+
+/* Light — for dark backgrounds (auth panels, footer) */
+.logo--light .logo-word-primary {
+  color: #ffffff;
+}
+
+.logo--light .logo-word-accent {
+  background: linear-gradient(135deg, #6fda44, #bef264);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
