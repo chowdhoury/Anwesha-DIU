@@ -1,4 +1,4 @@
-import React, { use, useContext, useState } from "react";
+import React, { useContext, useState } from "react";
 import { Link } from "react-router";
 import { useForm } from "react-hook-form";
 import {
@@ -23,14 +23,35 @@ const SignIn = () => {
     formState: { errors },
   } = useForm();
 
+  const getFirebaseAuthErrorMessage = (error) => {
+    const code = error?.code;
+
+    if (code === "auth/unauthorized-domain") {
+      return "Google sign-in is blocked for this domain. Add your current domain to Firebase Authorized domains (Authentication > Settings).";
+    }
+
+    if (code === "auth/popup-closed-by-user") {
+      return "Google sign-in popup was closed before completion.";
+    }
+
+    if (code === "auth/invalid-credential" || code === "auth/user-not-found") {
+      return "Invalid email or password.";
+    }
+
+    if (code === "auth/wrong-password") {
+      return "Incorrect password.";
+    }
+
+    return "Authentication failed. Please try again.";
+  };
+
   const onSubmit = async (data) => {
     try {
       await signIn(data.email, data.password);
       // Optionally redirect or show success
       toast.success("Sign-in successful!");
     } catch (error) {
-      // Optionally handle error, e.g. show error message
-        toast.error("Sign-in failed. Please check your credentials and try again.");
+      toast.error(getFirebaseAuthErrorMessage(error));
       console.error("Firebase signIn error:", error);
     }
   };
@@ -42,8 +63,7 @@ const SignIn = () => {
       toast.success("Google sign-in successful!");
       console.log("Google signIn successful, user:", user);
     } catch (error) {
-      // Optionally handle error, e.g. show error message
-        toast.error("Google sign-in failed. Please try again.");
+      toast.error(getFirebaseAuthErrorMessage(error));
       console.error("Firebase Google signIn error:", error);
     }
   };
