@@ -1,0 +1,217 @@
+/* ═══════════════  404 NOT FOUND  ═══════════════ */
+
+.nf-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #001e00 0%, #0a3d0a 55%, #13544e 100%);
+  position: relative;
+  overflow: hidden;
+  padding: 40px 24px;
+}
+
+.nf-bg-orbs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.nf-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+  animation: nfOrbFloat 8s ease-in-out infinite;
+}
+
+.nf-orb--1 {
+  width: 450px;
+  height: 450px;
+  background: #14a800;
+  top: -120px;
+  right: -80px;
+  animation-delay: 0s;
+}
+
+.nf-orb--2 {
+  width: 350px;
+  height: 350px;
+  background: #bef264;
+  bottom: -100px;
+  left: -60px;
+  animation-delay: -4s;
+  opacity: 0.15;
+}
+
+@keyframes nfOrbFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-20px) scale(1.05); }
+}
+
+.nf-inner {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  max-width: 520px;
+}
+
+.nf-code {
+  font-size: 120px;
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(135deg, #14a800, #bef264);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -4px;
+  margin-bottom: 8px;
+  animation: nfCodePulse 3s ease-in-out infinite;
+}
+
+@keyframes nfCodePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+.nf-emoji {
+  font-size: 56px;
+  margin-bottom: 20px;
+  display: block;
+  animation: nfEmojiBounce 2.5s ease-in-out infinite;
+}
+
+@keyframes nfEmojiBounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(10deg); }
+}
+
+.nf-title {
+  font-size: 36px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -1px;
+  margin-bottom: 16px;
+}
+
+.nf-desc {
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.7;
+  margin-bottom: 36px;
+}
+
+.nf-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+.nf-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #14a800, #6fda44);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 20px rgba(20, 168, 0, 0.35);
+}
+
+.nf-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(20, 168, 0, 0.45);
+}
+
+.nf-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(6px);
+}
+
+.nf-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateY(-2px);
+}
+
+.nf-suggestions {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 28px;
+}
+
+.nf-suggestions-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+}
+
+.nf-suggestions-links {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.nf-suggestion-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 20px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.nf-suggestion-chip:hover {
+  background: rgba(20, 168, 0, 0.25);
+  border-color: rgba(20, 168, 0, 0.5);
+  color: #bef264;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 480px) {
+  .nf-code {
+    font-size: 80px;
+  }
+
+  .nf-title {
+    font-size: 26px;
+  }
+
+  .nf-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .nf-btn-primary,
+  .nf-btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+}
