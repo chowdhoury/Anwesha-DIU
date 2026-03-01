@@ -22,8 +22,8 @@ const POSTS = [
   {
     id: 1,
     topic: "Success Stories",
-    author: "Arjun Patel",
-    initials: "AP",
+    author: "Tanvir Ahmed",
+    initials: "TA",
     avatarColor: "#14a800",
     badge: "Champion",
     time: "2h ago",
@@ -37,8 +37,8 @@ const POSTS = [
   {
     id: 2,
     topic: "Tips & Tricks",
-    author: "Mei Lin",
-    initials: "ML",
+    author: "Nusrat Jahan",
+    initials: "NJ",
     avatarColor: "#db2777",
     badge: "Champion",
     time: "5h ago",
@@ -67,8 +67,8 @@ const POSTS = [
   {
     id: 4,
     topic: "Help Needed",
-    author: "Carlos Ruiz",
-    initials: "CR",
+    author: "Farhan Hossain",
+    initials: "FH",
     avatarColor: "#0369a1",
     badge: "Expert",
     time: "3h ago",
@@ -82,23 +82,23 @@ const POSTS = [
   {
     id: 5,
     topic: "Introductions",
-    author: "Aisha Williams",
-    initials: "AW",
+    author: "Ayesha Siddiqua",
+    initials: "AS",
     avatarColor: "#d97706",
     badge: "Helper",
     time: "6h ago",
     title: "New here! Frontend dev & aspiring UX designer 👋",
-    body: "Hi everyone! I'm Aisha, a frontend dev from Lagos. I've been lurking for a while and finally decided to join. I specialize in React and Tailwind but I'm learning UX. Looking forward to helping and learning from this amazing community!",
+    body: "Hi everyone! I'm Ayesha, a frontend dev from Dhaka. I've been lurking for a while and finally decided to join. I specialize in React and Tailwind but I'm learning UX. Looking forward to helping and learning from this amazing community!",
     likes: 56,
     comments: 24,
-    tags: ["intro", "frontend", "Lagos"],
+    tags: ["intro", "frontend", "Dhaka"],
     pinned: false,
   },
   {
     id: 6,
     topic: "Tips & Tricks",
-    author: "Ravi Shankar",
-    initials: "RS",
+    author: "Maruf Hasan",
+    initials: "MH",
     avatarColor: "#059669",
     badge: "Helper",
     time: "2d ago",
@@ -291,12 +291,12 @@ const Community = () => {
               </h4>
               <div className="cm-top-list">
                 {[
-                  { name: "Arjun Patel", pts: 2840, initials: "AP", color: "#14a800" },
-                  { name: "Mei Lin", pts: 2310, initials: "ML", color: "#db2777" },
-                  { name: "Sneha Kapoor", pts: 1920, initials: "SK", color: "#7c3aed" },
+                  { name: "Tanvir Ahmed", pts: 2840, initials: "TA", color: "#14a800" },
+                  { name: "Nusrat Jahan", pts: 2310, initials: "NJ", color: "#db2777" },
+                  { name: "Rafiqul Islam", pts: 1920, initials: "RI", color: "#7c3aed" },
                 ].map((u, i) => (
                   <div key={u.name} className="cm-top-row">
-                    <span className="cm-top-rank">{["🥇","🥈","🥉"][i]}</span>
+                    <span className="cm-top-rank">{["🥇", "🥈", "🥉"][i]}</span>
                     <div className="cm-top-avatar" style={{ background: u.color }}>{u.initials}</div>
                     <span className="cm-top-name">{u.name}</span>
                     <span className="cm-top-pts"><IoFlashOutline /> {u.pts.toLocaleString()}</span>

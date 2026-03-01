@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { AuthContext } from "../../Authentication/AuthContext";
 import {
@@ -18,7 +18,8 @@ import toast from "react-hot-toast";
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const { signInWithGoogle, user,updateUserProfile, createUser } = useContext(AuthContext);
+  const { signInWithGoogle, user, updateUserProfile, createUser } = useContext(AuthContext);
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -33,6 +34,7 @@ const SignUp = () => {
       await createUser(email, password);
       await updateUserProfile(fullName);
       toast.success("Signup Successful");
+      navigate("/");
     } catch (err) {
       console.log(err);
       toast.error(err?.message);
@@ -42,9 +44,8 @@ const SignUp = () => {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
-      // Optionally redirect or show success
       toast.success("Google sign-in successful!");
-      console.log("Google signIn successful, user:", user);
+      navigate("/");
     } catch (error) {
       // Optionally handle error, e.g. show error message
       toast.error("Google sign-in failed. Please try again.");

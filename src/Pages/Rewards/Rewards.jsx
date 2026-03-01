@@ -90,14 +90,14 @@ const TIERS = [
 ];
 
 const LEADERBOARD = [
-  { rank: 1, name: "Arjun Patel", pts: 2840, initials: "AP", color: "#14a800", badge: "Champion" },
-  { rank: 2, name: "Mei Lin", pts: 2310, initials: "ML", color: "#db2777", badge: "Champion" },
-  { rank: 3, name: "Sneha Kapoor", pts: 1920, initials: "SK", color: "#7c3aed", badge: "Expert" },
-  { rank: 4, name: "Carlos Ruiz", pts: 1540, initials: "CR", color: "#0369a1", badge: "Expert" },
-  { rank: 5, name: "Fatima Al-Rashid", pts: 1280, initials: "FA", color: "#d97706", badge: "Expert" },
-  { rank: 6, name: "Omar Hassan", pts: 960, initials: "OH", color: "#ea580c", badge: "Helper" },
-  { rank: 7, name: "Ravi Shankar", pts: 820, initials: "RS", color: "#059669", badge: "Helper" },
-  { rank: 8, name: "Aisha Williams", pts: 640, initials: "AW", color: "#0891b2", badge: "Helper" },
+  { rank: 1, name: "Tanvir Ahmed", pts: 2840, initials: "TA", color: "#14a800", badge: "Champion" },
+  { rank: 2, name: "Nusrat Jahan", pts: 2310, initials: "NJ", color: "#db2777", badge: "Champion" },
+  { rank: 3, name: "Rafiqul Islam", pts: 1920, initials: "RI", color: "#7c3aed", badge: "Expert" },
+  { rank: 4, name: "Farhan Hossain", pts: 1540, initials: "FH", color: "#0369a1", badge: "Expert" },
+  { rank: 5, name: "Tasnim Akter", pts: 1280, initials: "TA", color: "#d97706", badge: "Expert" },
+  { rank: 6, name: "Sakib Rahman", pts: 960, initials: "SR", color: "#ea580c", badge: "Helper" },
+  { rank: 7, name: "Maruf Hasan", pts: 820, initials: "MH", color: "#059669", badge: "Helper" },
+  { rank: 8, name: "Ayesha Siddiqua", pts: 640, initials: "AS", color: "#0891b2", badge: "Helper" },
 ];
 
 const FAQ = [

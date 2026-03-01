@@ -54,8 +54,8 @@ const skills = [
     id: "1",
     category: "dev",
     title: "Full-Stack Web Development",
-    provider: "Arjun Patel",
-    initials: "AP",
+    provider: "Tanvir Ahmed",
+    initials: "TA",
     avatarColor: "#14a800",
     rating: 4.9,
     reviews: 312,
@@ -71,8 +71,8 @@ const skills = [
     id: "2",
     category: "design",
     title: "UI/UX Design & Figma Prototyping",
-    provider: "Sneha Kapoor",
-    initials: "SK",
+    provider: "Nusrat Jahan",
+    initials: "NJ",
     avatarColor: "#7c3aed",
     rating: 4.95,
     reviews: 218,
@@ -88,8 +88,8 @@ const skills = [
     id: "3",
     category: "writing",
     title: "Technical Blog Writing & SEO",
-    provider: "Lena Schmidt",
-    initials: "LS",
+    provider: "Sumaiya Khatun",
+    initials: "SK",
     avatarColor: "#0891b2",
     rating: 4.8,
     reviews: 145,
@@ -105,8 +105,8 @@ const skills = [
     id: "4",
     category: "marketing",
     title: "Social Media Strategy & Growth",
-    provider: "Omar Hassan",
-    initials: "OH",
+    provider: "Sakib Rahman",
+    initials: "SR",
     avatarColor: "#ea580c",
     rating: 4.7,
     reviews: 99,
@@ -122,8 +122,8 @@ const skills = [
     id: "5",
     category: "ai",
     title: "Python ML Model Training & Deployment",
-    provider: "Mei Lin",
-    initials: "ML",
+    provider: "Rafiqul Islam",
+    initials: "RI",
     avatarColor: "#db2777",
     rating: 4.92,
     reviews: 67,
@@ -139,8 +139,8 @@ const skills = [
     id: "6",
     category: "dev",
     title: "WordPress Site Development",
-    provider: "Carlos Ruiz",
-    initials: "CR",
+    provider: "Farhan Hossain",
+    initials: "FH",
     avatarColor: "#0369a1",
     rating: 4.75,
     reviews: 423,
@@ -156,8 +156,8 @@ const skills = [
     id: "7",
     category: "design",
     title: "Logo & Brand Identity Design",
-    provider: "Fatima Al-Rashid",
-    initials: "FA",
+    provider: "Tasnim Akter",
+    initials: "TA",
     avatarColor: "#d97706",
     rating: 4.88,
     reviews: 188,
@@ -173,8 +173,8 @@ const skills = [
     id: "8",
     category: "mobile",
     title: "Flutter Cross-Platform App Dev",
-    provider: "Ravi Shankar",
-    initials: "RS",
+    provider: "Maruf Hasan",
+    initials: "MH",
     avatarColor: "#059669",
     rating: 4.85,
     reviews: 134,
@@ -190,8 +190,8 @@ const skills = [
     id: "9",
     category: "finance",
     title: "Financial Modeling & Excel Dashboards",
-    provider: "Ingrid Björk",
-    initials: "IB",
+    provider: "Shahinur Rahman",
+    initials: "SR",
     avatarColor: "#7c3aed",
     rating: 4.82,
     reviews: 76,
@@ -207,8 +207,8 @@ const skills = [
     id: "10",
     category: "support",
     title: "Customer Support Automation Setup",
-    provider: "Kwame Asante",
-    initials: "KA",
+    provider: "Rahim Uddin",
+    initials: "RU",
     avatarColor: "#ca8a04",
     rating: 4.6,
     reviews: 52,
@@ -224,8 +224,8 @@ const skills = [
     id: "11",
     category: "writing",
     title: "Resume & LinkedIn Profile Makeover",
-    provider: "Aisha Williams",
-    initials: "AW",
+    provider: "Ayesha Siddiqua",
+    initials: "AS",
     avatarColor: "#0891b2",
     rating: 4.93,
     reviews: 291,
@@ -241,8 +241,8 @@ const skills = [
     id: "12",
     category: "ai",
     title: "ChatGPT / OpenAI API Integration",
-    provider: "Dmitri Volkov",
-    initials: "DV",
+    provider: "Zubair Hossain",
+    initials: "ZH",
     avatarColor: "#be185d",
     rating: 4.78,
     reviews: 89,
@@ -536,13 +536,12 @@ const SkillCard = ({ skill, listMode }) => (
   >
     {skill.badge && (
       <span
-        className={`mp-card-badge ${
-          skill.badge === "Top Rated"
+        className={`mp-card-badge ${skill.badge === "Top Rated"
             ? "mp-card-badge--gold"
             : skill.badge === "Expert"
-            ? "mp-card-badge--blue"
-            : "mp-card-badge--green"
-        }`}
+              ? "mp-card-badge--blue"
+              : "mp-card-badge--green"
+          }`}
       >
         {skill.badge === "Top Rated" && <IoTrophyOutline />}
         {skill.badge}

@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import {
   IoMailOutline,
@@ -16,6 +16,7 @@ import toast from "react-hot-toast";
 
 const SignIn = () => {
   const { signInWithGoogle, user, signIn } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const {
     register,
@@ -48,8 +49,8 @@ const SignIn = () => {
   const onSubmit = async (data) => {
     try {
       await signIn(data.email, data.password);
-      // Optionally redirect or show success
       toast.success("Sign-in successful!");
+      navigate("/");
     } catch (error) {
       toast.error(getFirebaseAuthErrorMessage(error));
       console.error("Firebase signIn error:", error);
@@ -59,9 +60,8 @@ const SignIn = () => {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
-      // Optionally redirect or show success
       toast.success("Google sign-in successful!");
-      console.log("Google signIn successful, user:", user);
+      navigate("/");
     } catch (error) {
       toast.error(getFirebaseAuthErrorMessage(error));
       console.error("Firebase Google signIn error:", error);

@@ -21,8 +21,8 @@ import "./MyRewards.css";
 
 /* ─── Mock Data ─────────────────────────────────── */
 const USER_STATS = {
-  name: "Arjun Patel",
-  initials: "AP",
+  name: "Tanvir Ahmed",
+  initials: "TA",
   avatarColor: "#14a800",
   totalPoints: 840,
   pointsEarned: 1020,
@@ -51,7 +51,7 @@ const TRANSACTIONS = [
     id: 1,
     type: "earned",
     title: "Full-Stack Web Development",
-    desc: "Completed for Sneha K.",
+    desc: "Completed for Rafiqul Islam",
     pts: 120,
     date: "Feb 24, 2026",
     status: "completed",
@@ -61,7 +61,7 @@ const TRANSACTIONS = [
     id: 2,
     type: "spent",
     title: "UI/UX Design & Figma Prototyping",
-    desc: "Requested from Fatima A.",
+    desc: "Requested from Tasnim Akter",
     pts: 90,
     date: "Feb 20, 2026",
     status: "completed",
@@ -71,7 +71,7 @@ const TRANSACTIONS = [
     id: 3,
     type: "earned",
     title: "Python ML Model Review",
-    desc: "Completed for Carlos R.",
+    desc: "Completed for Farhan Hossain",
     pts: 200,
     date: "Feb 14, 2026",
     status: "completed",
@@ -81,7 +81,7 @@ const TRANSACTIONS = [
     id: 4,
     type: "earned",
     title: "React Component Library",
-    desc: "Completed for Omar H.",
+    desc: "Completed for Sakib Rahman",
     pts: 150,
     date: "Feb 08, 2026",
     status: "completed",
@@ -91,7 +91,7 @@ const TRANSACTIONS = [
     id: 5,
     type: "spent",
     title: "Technical Blog Writing",
-    desc: "Requested from Lena S.",
+    desc: "Requested from Sumaiya Khatun",
     pts: 50,
     date: "Feb 01, 2026",
     status: "completed",
@@ -101,7 +101,7 @@ const TRANSACTIONS = [
     id: 6,
     type: "earned",
     title: "WordPress Site Development",
-    desc: "Completed for Aisha W.",
+    desc: "Completed for Ayesha Siddiqua",
     pts: 60,
     date: "Jan 27, 2026",
     status: "completed",
@@ -111,7 +111,7 @@ const TRANSACTIONS = [
     id: 7,
     type: "spent",
     title: "Social Media Strategy",
-    desc: "Requested from Ravi S.",
+    desc: "Requested from Maruf Hasan",
     pts: 40,
     date: "Jan 20, 2026",
     status: "completed",
@@ -121,7 +121,7 @@ const TRANSACTIONS = [
     id: 8,
     type: "earned",
     title: "API Integration Setup",
-    desc: "Completed for Mei L.",
+    desc: "Completed for Nusrat Jahan",
     pts: 80,
     date: "Jan 15, 2026",
     status: "completed",
@@ -130,10 +130,10 @@ const TRANSACTIONS = [
 ];
 
 const LEADERBOARD_SNIPPET = [
-  { rank: 1, name: "Arjun Patel", pts: 2840, initials: "AP", color: "#14a800", isMe: false },
-  { rank: 2, name: "Mei Lin", pts: 2310, initials: "ML", color: "#db2777", isMe: false },
-  { rank: 3, name: "You", pts: 840, initials: "AP", color: "#14a800", isMe: true },
-  { rank: 4, name: "Carlos Ruiz", pts: 780, initials: "CR", color: "#0369a1", isMe: false },
+  { rank: 1, name: "Tanvir Ahmed", pts: 2840, initials: "TA", color: "#14a800", isMe: false },
+  { rank: 2, name: "Nusrat Jahan", pts: 2310, initials: "NJ", color: "#db2777", isMe: false },
+  { rank: 3, name: "You", pts: 840, initials: "TA", color: "#14a800", isMe: true },
+  { rank: 4, name: "Farhan Hossain", pts: 780, initials: "FH", color: "#0369a1", isMe: false },
 ];
 
 const BADGES = [
@@ -163,7 +163,7 @@ const MyRewards = () => {
     100,
     ((TIER_PROGRESS.current - TIER_PROGRESS.prevMin) /
       (TIER_PROGRESS.nextMin - TIER_PROGRESS.prevMin)) *
-      100
+    100
   );
 
   return (

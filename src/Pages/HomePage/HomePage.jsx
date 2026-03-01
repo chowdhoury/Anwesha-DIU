@@ -6,7 +6,7 @@ import {
   IoCheckmarkCircle,
   IoShieldCheckmark,
   IoStarSharp,
-  IoStar, 
+  IoStar,
   IoGift,
 } from "react-icons/io5";
 import {
@@ -128,21 +128,21 @@ const testimonials = [
   {
     quote:
       "I helped someone debug their app and earned enough rewards to get a full logo redesign. No money exchanged — just skills!",
-    author: "Priya Sharma",
+    author: "MD Raihan Chowdhury",
     role: "Full Stack Developer",
     rating: 5,
   },
   {
     quote:
       "The reward system is genius. I designed a website for someone and used my points to get marketing help. True collaboration!",
-    author: "Alex Turner",
+    author: "MD Sayem Dewan",
     role: "UI/UX Designer",
     rating: 5,
   },
   {
     quote:
       "As a student, I can't afford freelancers. On Anwesha, I just help others and earn rewards to get the help I need.",
-    author: "Rohan Mehta",
+    author: "Muhtasim Fuad Rahat",
     role: "Computer Science Student",
     rating: 5,
   },
@@ -224,17 +224,17 @@ const HomePage = () => {
           <div className="hero-visual">
             <div className="hero-card">
               <div className="hero-card-avatar">
-                <div className="avatar-placeholder">JS</div>
+                <div className="avatar-placeholder">HN</div>
                 <div className="online-dot"></div>
               </div>
               <div className="hero-card-info">
-                <h4>John Smith</h4>
+                <h4>Hasibul Islam Nabid</h4>
                 <p>Full Stack Developer</p>
                 <div className="hero-card-stars">
                   {[...Array(5)].map((_, i) => (
                     <IoStarSharp key={i} className="star-icon" />
                   ))}
-                  <span>4.9 (2,847 reviews)</span>
+                  <span>4.9 (287 reviews)</span>
                 </div>
               </div>
               <div className="hero-card-stats">
