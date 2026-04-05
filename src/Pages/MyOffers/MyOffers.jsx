@@ -37,7 +37,7 @@ const MyOffers = () => {
     try {
       setLoading(true);
       const res = await fetch(
-        `http://localhost:3000/applications/user/${encodeURIComponent(user.email)}`,
+        `https://anwesha-backend.vercel.app/applications/user/${encodeURIComponent(user.email)}`,
       );
       if (!res.ok) throw new Error("Failed to fetch offers");
       const data = await res.json();
@@ -53,7 +53,7 @@ const MyOffers = () => {
     if (!withdrawId) return;
     try {
       const res = await fetch(
-        `http://localhost:3000/applications/${withdrawId}`,
+        `https://anwesha-backend.vercel.app/applications/${withdrawId}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

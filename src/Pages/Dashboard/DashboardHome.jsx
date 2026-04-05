@@ -27,7 +27,7 @@ import {
 } from "react-icons/io5";
 import "./DashboardHome.css";
 
-const API_BASE = "http://localhost:3000";
+const API_BASE = "https://anwesha-backend.vercel.app";
 
 const DashboardHome = () => {
   const { user, dbUser } = useContext(AuthContext);

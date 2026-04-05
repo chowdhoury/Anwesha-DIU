@@ -74,7 +74,9 @@ const Community = () => {
   const fetchPosts = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("http://localhost:3000/community");
+      const response = await fetch(
+        "https://anwesha-backend.vercel.app/community",
+      );
       if (!response.ok) throw new Error("Failed to fetch posts");
       const data = await response.json();
       setPosts(data);
@@ -162,13 +164,16 @@ const Community = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:3000/community", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        "https://anwesha-backend.vercel.app/community",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(postData),
         },
-        body: JSON.stringify(postData),
-      });
+      );
 
       if (!response.ok) {
         throw new Error("Failed to create post");

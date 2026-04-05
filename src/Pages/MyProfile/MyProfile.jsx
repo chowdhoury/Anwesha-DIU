@@ -54,7 +54,7 @@ const MyProfile = () => {
   useEffect(() => {
     if (user?.email) {
       setStatsLoading(true);
-      fetch(`http://localhost:3000/users/${user.email}/stats`)
+      fetch(`https://anwesha-backend.vercel.app/users/${user.email}/stats`)
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => setStats(data))
         .catch((err) => console.error("Failed to fetch stats:", err))
@@ -134,21 +134,24 @@ const MyProfile = () => {
       });
 
       // Persist extended profile fields to backend DB
-      const res = await fetch(`http://localhost:3000/users/${user.email}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: editForm.displayName.trim(),
-          profilePicture: editForm.photoURL.trim() || "",
-          bio: editForm.bio.trim(),
-          location: editForm.location.trim(),
-          website: editForm.website.trim(),
-          skills: editForm.skills,
-          github: editForm.github.trim(),
-          linkedin: editForm.linkedin.trim(),
-          twitter: editForm.twitter.trim(),
-        }),
-      });
+      const res = await fetch(
+        `https://anwesha-backend.vercel.app/users/${user.email}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: editForm.displayName.trim(),
+            profilePicture: editForm.photoURL.trim() || "",
+            bio: editForm.bio.trim(),
+            location: editForm.location.trim(),
+            website: editForm.website.trim(),
+            skills: editForm.skills,
+            github: editForm.github.trim(),
+            linkedin: editForm.linkedin.trim(),
+            twitter: editForm.twitter.trim(),
+          }),
+        },
+      );
       if (!res.ok) throw new Error("Failed to save profile to database");
 
       // Refresh dbUser so the UI updates immediately

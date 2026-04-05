@@ -3,7 +3,8 @@ import { useEffect, useRef, useState, useContext, useCallback } from "react";
 import { AuthContext } from "../Authentication/AuthContext";
 import { auth } from "../Firebase/Firebase.config";
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const SOCKET_URL =
+  import.meta.env.VITE_API_URL || "https://anwesha-backend.vercel.app";
 
 /**
  * Socket.io connection hook.

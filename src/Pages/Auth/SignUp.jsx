@@ -29,7 +29,7 @@ const SignUp = () => {
   } = useForm();
 
   const createUserInDb = async (authUser, fallbackName = "") => {
-    const response = await fetch("http://localhost:3000/users", {
+    const response = await fetch("https://anwesha-backend.vercel.app/users", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

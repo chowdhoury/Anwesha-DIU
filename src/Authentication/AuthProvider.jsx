@@ -21,7 +21,9 @@ const AuthProvider = ({ children }) => {
 
   const fetchDbUser = async (email) => {
     try {
-      const res = await fetch(`http://localhost:3000/users/${email}`);
+      const res = await fetch(
+        `https://anwesha-backend.vercel.app/users/${email}`,
+      );
       if (res.ok) {
         const data = await res.json();
         setDbUser(data);

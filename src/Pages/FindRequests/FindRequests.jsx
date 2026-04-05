@@ -85,7 +85,9 @@ const FindRequests = () => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:3000/posts");
+        const response = await fetch(
+          "https://anwesha-backend.vercel.app/posts",
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch posts");
         }

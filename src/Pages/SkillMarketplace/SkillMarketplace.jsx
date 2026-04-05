@@ -110,7 +110,7 @@ const SkillMarketplace = () => {
   const [activeCategory, setActiveCategory] = useState(initialCategory);
 
   useEffect(() => {
-    fetch("http://localhost:3000/skills")
+    fetch("https://anwesha-backend.vercel.app/skills")
       .then((response) => response.json())
       .then((data) => {
         // Transform API data to match component expected format

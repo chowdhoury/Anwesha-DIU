@@ -281,7 +281,7 @@ const MyRequests = () => {
     try {
       setLoading(true);
       const res = await fetch(
-        `http://localhost:3000/posts?user=${user?.email}`,
+        `https://anwesha-backend.vercel.app/posts?user=${user?.email}`,
       );
       const data = await res.json();
       setRequests(data || []);
@@ -295,7 +295,7 @@ const MyRequests = () => {
   const fetchApplications = async () => {
     try {
       const res = await fetch(
-        `http://localhost:3000/applications/owner/${user?.email}`,
+        `https://anwesha-backend.vercel.app/applications/owner/${user?.email}`,
       );
       const data = await res.json();
       setApplications(data || []);
@@ -319,32 +319,35 @@ const MyRequests = () => {
           (r) => r._id?.toString() === app?.postId?.toString(),
         );
         if (app && request) {
-          const projectRes = await fetch("http://localhost:3000/projects", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              postId: request._id,
-              owner: {
-                uid: user?.uid,
-                email: user?.email,
-                displayName: user?.displayName,
-                photoURL: user?.photoURL,
-              },
-              helper: {
-                uid: app.applicant?.uid || null,
-                email: app.applicant?.email,
-                displayName: app.applicant?.displayName,
-                photoURL: app.applicant?.photoURL,
-              },
-              title: request.title,
-              description: request.description,
-              category: request.category,
-              tags: request.tags,
-              rewardPoints: app.expectedReward,
-              deadline: request.deadline,
-              urgency: request.urgency,
-            }),
-          });
+          const projectRes = await fetch(
+            "https://anwesha-backend.vercel.app/projects",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                postId: request._id,
+                owner: {
+                  uid: user?.uid,
+                  email: user?.email,
+                  displayName: user?.displayName,
+                  photoURL: user?.photoURL,
+                },
+                helper: {
+                  uid: app.applicant?.uid || null,
+                  email: app.applicant?.email,
+                  displayName: app.applicant?.displayName,
+                  photoURL: app.applicant?.photoURL,
+                },
+                title: request.title,
+                description: request.description,
+                category: request.category,
+                tags: request.tags,
+                rewardPoints: app.expectedReward,
+                deadline: request.deadline,
+                urgency: request.urgency,
+              }),
+            },
+          );
 
           if (!projectRes.ok) {
             const errData = await projectRes.json();
@@ -361,7 +364,7 @@ const MyRequests = () => {
           const projectData = await projectRes.json();
 
           // Create a contract record for this accepted application
-          await fetch("http://localhost:3000/contracts", {
+          await fetch("https://anwesha-backend.vercel.app/contracts", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -393,7 +396,7 @@ const MyRequests = () => {
       }
 
       // Update application status only after project is created successfully
-      await fetch(`http://localhost:3000/applications/${appId}`, {
+      await fetch(`https://anwesha-backend.vercel.app/applications/${appId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
@@ -431,7 +434,9 @@ const MyRequests = () => {
     if (!result.isConfirmed) return;
 
     try {
-      await fetch(`http://localhost:3000/posts/${id}`, { method: "DELETE" });
+      await fetch(`https://anwesha-backend.vercel.app/posts/${id}`, {
+        method: "DELETE",
+      });
       await Swal.fire({
         title: "Deleted!",
         text: "Your request has been deleted successfully.",
@@ -457,7 +462,7 @@ const MyRequests = () => {
     if (!confirm("Close this request? No more offers will be accepted."))
       return;
     try {
-      await fetch(`http://localhost:3000/posts/${id}`, {
+      await fetch(`https://anwesha-backend.vercel.app/posts/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "closed" }),
@@ -485,7 +490,7 @@ const MyRequests = () => {
     if (!result.isConfirmed) return;
 
     try {
-      await fetch(`http://localhost:3000/posts/${id}`, {
+      await fetch(`https://anwesha-backend.vercel.app/posts/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "CANCELLED" }),
@@ -499,7 +504,7 @@ const MyRequests = () => {
 
   const handleReopen = async (id) => {
     try {
-      await fetch(`http://localhost:3000/posts/${id}`, {
+      await fetch(`https://anwesha-backend.vercel.app/posts/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "OPEN" }),
@@ -571,19 +576,22 @@ const MyRequests = () => {
     }
 
     try {
-      await fetch(`http://localhost:3000/posts/${editModal.request._id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: editForm.title.trim(),
-          description: editForm.description.trim(),
-          category: editForm.category.trim(),
-          tags: editForm.tags,
-          rewardPoints: Number(editForm.rewardPoints) || 0,
-          deadline: editForm.deadline,
-          urgency: editForm.urgency,
-        }),
-      });
+      await fetch(
+        `https://anwesha-backend.vercel.app/posts/${editModal.request._id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: editForm.title.trim(),
+            description: editForm.description.trim(),
+            category: editForm.category.trim(),
+            tags: editForm.tags,
+            rewardPoints: Number(editForm.rewardPoints) || 0,
+            deadline: editForm.deadline,
+            urgency: editForm.urgency,
+          }),
+        },
+      );
       await Swal.fire({
         title: "Updated!",
         text: "Your request has been updated successfully.",

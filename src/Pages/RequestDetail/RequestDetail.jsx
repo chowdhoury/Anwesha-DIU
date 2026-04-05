@@ -224,7 +224,7 @@ const RequestDetail = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`http://localhost:3000/posts/${id}`)
+    fetch(`https://anwesha-backend.vercel.app/posts/${id}`)
       .then((response) => {
         if (!response.ok) throw new Error("Request not found");
         return response.json();
@@ -303,23 +303,26 @@ const RequestDetail = () => {
     }
     setApplyLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/applications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          postId: id,
-          proposedDeadline: applyForm.proposedDeadline,
-          expectedReward: applyForm.expectedReward,
-          skills: applyForm.skills,
-          coverMessage: applyForm.coverMessage,
-          applicant: {
-            uid: user.uid,
-            displayName: user.displayName,
-            email: user.email,
-            photoURL: user.photoURL,
-          },
-        }),
-      });
+      const res = await fetch(
+        "https://anwesha-backend.vercel.app/applications",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            postId: id,
+            proposedDeadline: applyForm.proposedDeadline,
+            expectedReward: applyForm.expectedReward,
+            skills: applyForm.skills,
+            coverMessage: applyForm.coverMessage,
+            applicant: {
+              uid: user.uid,
+              displayName: user.displayName,
+              email: user.email,
+              photoURL: user.photoURL,
+            },
+          }),
+        },
+      );
       if (!res.ok) throw new Error("Failed to submit application");
       toast.success("Application submitted successfully!");
       closeApplyModal();

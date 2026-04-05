@@ -528,13 +528,16 @@ const PostSkill = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:3000/skills", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        "https://anwesha-backend.vercel.app/skills",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(skillData),
         },
-        body: JSON.stringify(skillData),
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to post skill: ${response.statusText}`);

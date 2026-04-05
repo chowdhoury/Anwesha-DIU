@@ -134,32 +134,35 @@ const SkillDetail = () => {
     setHireSubmitting(true);
     try {
       const pkg = skill.packages[selectedPackage] || skill.packages[0];
-      const res = await fetch("http://localhost:3000/hire-requests", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          skillId: skill.id,
-          skillTitle: skill.title,
-          package: pkg.name,
-          rewardPoints: pkg.pts,
-          deliveryDays: pkg.delivery,
-          message: hireMessage.trim(),
-          client: {
-            uid: user.uid,
-            name: user.displayName,
-            email: user.email,
-            photoURL: user.photoURL,
-          },
-          provider: {
-            uid: skill.sellerId,
-            name: skill.provider,
-            email: skill.providerEmail,
-            photoURL: skill.providerPhoto,
-          },
-          status: "pending",
-          createdAt: new Date().toISOString(),
-        }),
-      });
+      const res = await fetch(
+        "https://anwesha-backend.vercel.app/hire-requests",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            skillId: skill.id,
+            skillTitle: skill.title,
+            package: pkg.name,
+            rewardPoints: pkg.pts,
+            deliveryDays: pkg.delivery,
+            message: hireMessage.trim(),
+            client: {
+              uid: user.uid,
+              name: user.displayName,
+              email: user.email,
+              photoURL: user.photoURL,
+            },
+            provider: {
+              uid: skill.sellerId,
+              name: skill.provider,
+              email: skill.providerEmail,
+              photoURL: skill.providerPhoto,
+            },
+            status: "pending",
+            createdAt: new Date().toISOString(),
+          }),
+        },
+      );
       if (!res.ok) throw new Error("Failed to send request");
       toast.success("Hire request sent successfully!");
       setShowHireModal(false);
@@ -210,7 +213,7 @@ const SkillDetail = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`http://localhost:3000/skills/${id}`)
+    fetch(`https://anwesha-backend.vercel.app/skills/${id}`)
       .then((response) => {
         if (!response.ok) throw new Error("Skill not found");
         return response.json();

@@ -49,7 +49,12 @@ const MyCommunityPosts = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [editModal, setEditModal] = useState({ open: false, post: null });
-  const [editForm, setEditForm] = useState({ title: "", body: "", topic: "", tags: "" });
+  const [editForm, setEditForm] = useState({
+    title: "",
+    body: "",
+    topic: "",
+    tags: "",
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -60,7 +65,7 @@ const MyCommunityPosts = () => {
     try {
       setLoading(true);
       const res = await fetch(
-        `http://localhost:3000/community?author=${user?.email}`,
+        `https://anwesha-backend.vercel.app/community?author=${user?.email}`,
       );
       const data = await res.json();
       setPosts(data || []);
@@ -86,7 +91,7 @@ const MyCommunityPosts = () => {
     if (!result.isConfirmed) return;
 
     try {
-      await fetch(`http://localhost:3000/community/${id}`, {
+      await fetch(`https://anwesha-backend.vercel.app/community/${id}`, {
         method: "DELETE",
       });
       await Swal.fire({
@@ -109,7 +114,7 @@ const MyCommunityPosts = () => {
   const handleToggleStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === "published" ? "archived" : "published";
     try {
-      await fetch(`http://localhost:3000/community/${id}`, {
+      await fetch(`https://anwesha-backend.vercel.app/community/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ metadata: { status: newStatus } }),
@@ -140,19 +145,22 @@ const MyCommunityPosts = () => {
     }
 
     try {
-      await fetch(`http://localhost:3000/community/${editModal.post._id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: editForm.title.trim(),
-          body: editForm.body.trim(),
-          topic: editForm.topic.trim(),
-          tags: editForm.tags
-            .split(",")
-            .map((t) => t.trim())
-            .filter(Boolean),
-        }),
-      });
+      await fetch(
+        `https://anwesha-backend.vercel.app/community/${editModal.post._id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: editForm.title.trim(),
+            body: editForm.body.trim(),
+            topic: editForm.topic.trim(),
+            tags: editForm.tags
+              .split(",")
+              .map((t) => t.trim())
+              .filter(Boolean),
+          }),
+        },
+      );
       await Swal.fire({
         title: "Updated!",
         text: "Your post has been updated successfully.",
@@ -387,7 +395,10 @@ const MyCommunityPosts = () => {
 
       {/* Edit Modal */}
       {editModal.open && (
-        <div className="edit-modal-overlay" onClick={() => setEditModal({ open: false, post: null })}>
+        <div
+          className="edit-modal-overlay"
+          onClick={() => setEditModal({ open: false, post: null })}
+        >
           <div className="edit-modal" onClick={(e) => e.stopPropagation()}>
             <div className="edit-modal-header">
               <h2>Edit Post</h2>
@@ -404,7 +415,9 @@ const MyCommunityPosts = () => {
                 <input
                   type="text"
                   value={editForm.title}
-                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, title: e.target.value })
+                  }
                   placeholder="Post title"
                 />
               </div>
@@ -412,7 +425,9 @@ const MyCommunityPosts = () => {
                 <label>Topic</label>
                 <select
                   value={editForm.topic}
-                  onChange={(e) => setEditForm({ ...editForm, topic: e.target.value })}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, topic: e.target.value })
+                  }
                 >
                   {TOPICS.map((topic) => (
                     <option key={topic} value={topic}>
@@ -425,7 +440,9 @@ const MyCommunityPosts = () => {
                 <label>Body</label>
                 <textarea
                   value={editForm.body}
-                  onChange={(e) => setEditForm({ ...editForm, body: e.target.value })}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, body: e.target.value })
+                  }
                   placeholder="Write your post content..."
                   rows={5}
                 />
@@ -435,7 +452,9 @@ const MyCommunityPosts = () => {
                 <input
                   type="text"
                   value={editForm.tags}
-                  onChange={(e) => setEditForm({ ...editForm, tags: e.target.value })}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, tags: e.target.value })
+                  }
                   placeholder="e.g., motivation, success, growth"
                 />
               </div>

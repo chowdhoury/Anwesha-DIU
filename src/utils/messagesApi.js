@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://anwesha-backend.vercel.app";
 
 export const messagesApi = {
   // Find or create a conversation between two users

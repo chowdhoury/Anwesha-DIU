@@ -176,8 +176,8 @@ const Rewards = () => {
     const fetchData = async () => {
       try {
         const [usersRes, projectsRes] = await Promise.all([
-          fetch("http://localhost:3000/users"),
-          fetch("http://localhost:3000/projects/count"),
+          fetch("https://anwesha-backend.vercel.app/users"),
+          fetch("https://anwesha-backend.vercel.app/projects/count"),
         ]);
         const users = await usersRes.json();
 

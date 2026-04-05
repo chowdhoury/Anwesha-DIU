@@ -347,7 +347,7 @@ const PostRequest = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:3000/posts", {
+      const response = await fetch("https://anwesha-backend.vercel.app/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

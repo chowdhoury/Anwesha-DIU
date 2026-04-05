@@ -144,7 +144,7 @@ const MyRewards = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const res = await fetch("http://localhost:3000/users");
+        const res = await fetch("https://anwesha-backend.vercel.app/users");
         const users = await res.json();
 
         const sorted = [...users]
@@ -195,7 +195,7 @@ const MyRewards = () => {
     const fetchUserProfile = async () => {
       try {
         const res = await fetch(
-          `http://localhost:3000/users/${encodeURIComponent(user.email)}`,
+          `https://anwesha-backend.vercel.app/users/${encodeURIComponent(user.email)}`,
         );
         const data = await res.json();
         setUserProfile(data);
@@ -210,7 +210,7 @@ const MyRewards = () => {
     const fetchContracts = async () => {
       try {
         const res = await fetch(
-          `http://localhost:3000/contracts?email=${encodeURIComponent(user.email)}`,
+          `https://anwesha-backend.vercel.app/contracts?email=${encodeURIComponent(user.email)}`,
         );
         const contracts = await res.json();
 

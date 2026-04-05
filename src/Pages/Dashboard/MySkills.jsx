@@ -78,7 +78,7 @@ const MySkills = () => {
       setLoading(true);
       // Fetch skills for current user
       const res = await fetch(
-        `http://localhost:3000/skills?seller=${user?.email}`,
+        `https://anwesha-backend.vercel.app/skills?seller=${user?.email}`,
       );
       const data = await res.json();
       setSkills(data || []);
@@ -92,7 +92,7 @@ const MySkills = () => {
   const fetchHireRequests = async () => {
     try {
       const res = await fetch(
-        `http://localhost:3000/hire-requests?email=${user?.email}`,
+        `https://anwesha-backend.vercel.app/hire-requests?email=${user?.email}`,
       );
       const data = await res.json();
       setHireRequests(data || []);
@@ -119,32 +119,35 @@ const MySkills = () => {
         const hr = hireRequests.find((h) => h._id === hrId);
         if (hr) {
           // Create a project (client is the owner, provider is the helper)
-          const projectRes = await fetch("http://localhost:3000/projects", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              postId: hr.skillId,
-              owner: {
-                uid: hr.client?.uid,
-                email: hr.client?.email,
-                displayName: hr.client?.name,
-                photoURL: hr.client?.photoURL,
-              },
-              helper: {
-                uid: hr.provider?.uid,
-                email: hr.provider?.email,
-                displayName: hr.provider?.name,
-                photoURL: hr.provider?.photoURL,
-              },
-              title: hr.skillTitle,
-              description: hr.message || "",
-              category: "",
-              tags: [],
-              rewardPoints: hr.rewardPoints,
-              deadline: `${hr.deliveryDays} days`,
-              urgency: "LOW",
-            }),
-          });
+          const projectRes = await fetch(
+            "https://anwesha-backend.vercel.app/projects",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                postId: hr.skillId,
+                owner: {
+                  uid: hr.client?.uid,
+                  email: hr.client?.email,
+                  displayName: hr.client?.name,
+                  photoURL: hr.client?.photoURL,
+                },
+                helper: {
+                  uid: hr.provider?.uid,
+                  email: hr.provider?.email,
+                  displayName: hr.provider?.name,
+                  photoURL: hr.provider?.photoURL,
+                },
+                title: hr.skillTitle,
+                description: hr.message || "",
+                category: "",
+                tags: [],
+                rewardPoints: hr.rewardPoints,
+                deadline: `${hr.deliveryDays} days`,
+                urgency: "LOW",
+              }),
+            },
+          );
 
           if (!projectRes.ok) {
             const errData = await projectRes.json();
@@ -161,7 +164,7 @@ const MySkills = () => {
           const projectData = await projectRes.json();
 
           // Create a contract
-          await fetch("http://localhost:3000/contracts", {
+          await fetch("https://anwesha-backend.vercel.app/contracts", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -191,7 +194,7 @@ const MySkills = () => {
       }
 
       // Update hire request status
-      await fetch(`http://localhost:3000/hire-requests/${hrId}`, {
+      await fetch(`https://anwesha-backend.vercel.app/hire-requests/${hrId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
@@ -224,7 +227,9 @@ const MySkills = () => {
     if (!result.isConfirmed) return;
 
     try {
-      await fetch(`http://localhost:3000/skills/${id}`, { method: "DELETE" });
+      await fetch(`https://anwesha-backend.vercel.app/skills/${id}`, {
+        method: "DELETE",
+      });
       await Swal.fire({
         title: "Deleted!",
         text: "Your skill has been deleted successfully.",
@@ -249,7 +254,7 @@ const MySkills = () => {
   const handleToggleStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === "published" ? "archived" : "published";
     try {
-      await fetch(`http://localhost:3000/skills/${id}`, {
+      await fetch(`https://anwesha-backend.vercel.app/skills/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
@@ -280,19 +285,22 @@ const MySkills = () => {
     }
 
     try {
-      await fetch(`http://localhost:3000/skills/${editModal.skill._id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: editForm.title.trim(),
-          description: editForm.description.trim(),
-          category: editForm.category.trim(),
-          tags: editForm.tags
-            .split(",")
-            .map((t) => t.trim())
-            .filter(Boolean),
-        }),
-      });
+      await fetch(
+        `https://anwesha-backend.vercel.app/skills/${editModal.skill._id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: editForm.title.trim(),
+            description: editForm.description.trim(),
+            category: editForm.category.trim(),
+            tags: editForm.tags
+              .split(",")
+              .map((t) => t.trim())
+              .filter(Boolean),
+          }),
+        },
+      );
       await Swal.fire({
         title: "Updated!",
         text: "Your skill has been updated successfully.",
