@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link } from "react-router";
 import {
   IoArrowBack,
@@ -15,24 +15,207 @@ import {
   IoSearchOutline,
   IoAlertCircleOutline,
 } from "react-icons/io5";
+import { AuthContext } from "../../Authentication/AuthContext";
 import "./PostRequest.css";
 
 /* ─── Constants ─────────────────── */
 const CATEGORIES = [
-  "Tech",
-  "Design",
-  "Writing",
-  "Education",
-  "Music",
-  "Business",
-  "Lifestyle",
+  "Development & IT",
+  "Design & Creative",
+  "Writing & Translation",
+  "Sales & Marketing",
+  "Finance & Accounting",
+  "Admin & Customer Support",
+  "Engineering & Architecture",
+  "AI & Machine Learning",
   "Other",
 ];
 
+const SKILLS_BY_CATEGORY = {
+  "Development & IT": [
+    "React",
+    "Node.js",
+    "MongoDB",
+    "Python",
+    "JavaScript",
+    "TypeScript",
+    "Java",
+    "C++",
+    "C#",
+    "PHP",
+    "Ruby",
+    "Go",
+    "Rust",
+    "Swift",
+    "Kotlin",
+    "Vue.js",
+    "Angular",
+    "Next.js",
+    "Express.js",
+    "Django",
+    "Flask",
+    "Spring Boot",
+    "Laravel",
+    "Ruby on Rails",
+    "ASP.NET",
+    "PostgreSQL",
+    "MySQL",
+    "Redis",
+    "GraphQL",
+    "REST API",
+    "Docker",
+    "Kubernetes",
+    "AWS",
+    "Azure",
+    "Google Cloud",
+    "DevOps",
+    "CI/CD",
+    "Git",
+    "WordPress",
+    "Elementor",
+    "WooCommerce",
+    "Shopify",
+    "Flutter",
+    "Firebase",
+    "iOS & Android",
+    "React Native",
+    "Swift UI",
+  ],
+  "Design & Creative": [
+    "Figma",
+    "Adobe Illustrator",
+    "Adobe Photoshop",
+    "Adobe XD",
+    "Sketch",
+    "UI Design",
+    "UX Design",
+    "Wireframing",
+    "Prototyping",
+    "Logo",
+    "Branding",
+    "Graphic Design",
+    "Web Design",
+    "Mobile App Design",
+    "Motion Graphics",
+    "Video Editing",
+    "3D Modeling",
+    "Blender",
+    "Animation",
+    "Canva",
+    "InDesign",
+    "After Effects",
+  ],
+  "Writing & Translation": [
+    "SEO",
+    "Blog Posts",
+    "Technical Writing",
+    "Copywriting",
+    "Content Writing",
+    "Proofreading",
+    "Editing",
+    "Translation",
+    "Creative Writing",
+    "Ghostwriting",
+    "Article Writing",
+    "Script Writing",
+    "Grant Writing",
+  ],
+  "Sales & Marketing": [
+    "Instagram",
+    "TikTok",
+    "Content Calendar",
+    "Social Media Marketing",
+    "Email Marketing",
+    "Google Ads",
+    "Facebook Ads",
+    "Analytics",
+    "Lead Generation",
+    "Brand Strategy",
+    "Influencer Marketing",
+    "Marketing Automation",
+    "CRM",
+    "Salesforce",
+    "HubSpot",
+  ],
+  "Finance & Accounting": [
+    "Excel",
+    "DCF",
+    "Financial Modeling",
+    "QuickBooks",
+    "Accounting",
+    "Bookkeeping",
+    "Tax Preparation",
+    "Financial Analysis",
+    "Budgeting",
+    "Payroll",
+    "Xero",
+    "SAP",
+    "Tally",
+  ],
+  "Admin & Customer Support": [
+    "Intercom",
+    "Zendesk",
+    "Chatbots",
+    "Virtual Assistant",
+    "Data Entry",
+    "Customer Service",
+    "Live Chat",
+    "Help Desk",
+    "Scheduling",
+    "Email Management",
+    "Calendar Management",
+    "Research",
+  ],
+  "Engineering & Architecture": [
+    "AutoCAD",
+    "Revit",
+    "SolidWorks",
+    "SketchUp",
+    "Civil 3D",
+    "Structural Design",
+    "MEP Design",
+    "3D Rendering",
+    "BIM",
+    "Interior Design",
+    "Landscape Design",
+    "Urban Planning",
+  ],
+  "AI & Machine Learning": [
+    "TensorFlow",
+    "PyTorch",
+    "FastAPI",
+    "OpenAI",
+    "LangChain",
+    "API",
+    "Machine Learning",
+    "Deep Learning",
+    "NLP",
+    "Computer Vision",
+    "Data Science",
+    "Neural Networks",
+    "ChatGPT Integration",
+    "Hugging Face",
+  ],
+  Other: [
+    "Resume",
+    "LinkedIn",
+    "Career Coaching",
+    "Interview Prep",
+    "Project Management",
+    "Business Analysis",
+    "Consulting",
+    "Training",
+    "Tutoring",
+    "Music Production",
+    "Voice Over",
+  ],
+};
+
 const URGENCY_OPTIONS = [
-  { value: "low", label: "Low – No rush", color: "#10b981" },
-  { value: "medium", label: "Medium – Within a week", color: "#f59e0b" },
-  { value: "high", label: "High – Urgent!", color: "#ef4444" },
+  { value: "LOW", label: "Low", color: "#10b981" },
+  { value: "MEDIUM", label: "Medium", color: "#f59e0b" },
+  { value: "HIGH", label: "High", color: "#ef4444" },
+  { value: "CRITICAL", label: "Critical", color: "#dc2626" },
 ];
 
 const DEADLINE_OPTIONS = [
@@ -54,8 +237,10 @@ const STEPS = [
 
 /* ─── Component ─────────────────── */
 const PostRequest = () => {
+  const { user } = useContext(AuthContext);
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [showSkillDropdown, setShowSkillDropdown] = useState(false);
 
   /* Step 1: Details */
   const [details, setDetails] = useState({
@@ -69,27 +254,52 @@ const PostRequest = () => {
   /* Step 2: Preferences */
   const [prefs, setPrefs] = useState({
     points: "",
-    deadline: "1 week",
-    urgency: "medium",
+    deadline: "24 hours",
+    urgency: "MEDIUM",
     location: "Remote",
   });
 
   /* ── Handlers ── */
-  const handleDetailsChange = (field, value) =>
-    setDetails((prev) => ({ ...prev, [field]: value }));
+  const handleDetailsChange = (field, value) => {
+    setDetails((prev) => {
+      // Clear tags when category changes (skills are category-specific)
+      if (field === "category" && prev.category !== value) {
+        return { ...prev, [field]: value, tags: [], tagInput: "" };
+      }
+      return { ...prev, [field]: value };
+    });
+  };
 
   const handlePrefsChange = (field, value) =>
     setPrefs((prev) => ({ ...prev, [field]: value }));
 
-  const addTag = () => {
-    const tag = details.tagInput.trim();
+  const selectTag = (tag) => {
     if (tag && !details.tags.includes(tag) && details.tags.length < 8) {
-      setDetails((prev) => ({ ...prev, tags: [...prev.tags, tag], tagInput: "" }));
+      setDetails((prev) => ({
+        ...prev,
+        tags: [...prev.tags, tag],
+        tagInput: "",
+      }));
+      setShowSkillDropdown(false);
     }
   };
 
+  // Get skills based on selected category
+  const availableSkills = details.category
+    ? SKILLS_BY_CATEGORY[details.category] || []
+    : [];
+
+  const filteredSkills = availableSkills.filter(
+    (skill) =>
+      !details.tags.includes(skill) &&
+      skill.toLowerCase().includes(details.tagInput.toLowerCase()),
+  );
+
   const removeTag = (tag) =>
-    setDetails((prev) => ({ ...prev, tags: prev.tags.filter((t) => t !== tag) }));
+    setDetails((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((t) => t !== tag),
+    }));
 
   /* ── Validation ── */
   const canProceedStep1 =
@@ -99,7 +309,65 @@ const PostRequest = () => {
 
   const canProceedStep2 = prefs.points && parseInt(prefs.points) > 0;
 
-  const handleSubmit = () => setSubmitted(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    const postData = {
+      // User Information
+      author: {
+        email: user?.email || null,
+        displayName: user?.displayName || null,
+        photoURL: user?.photoURL || null,
+        uid: user?.uid || null,
+      },
+
+      // Request Details
+      title: details.title.trim(),
+      category: details.category,
+      description: details.description.trim(),
+      tags: details.tags,
+
+      // Preferences
+      rewardPoints: parseInt(prefs.points),
+      deadline: prefs.deadline,
+      urgency: prefs.urgency,
+      location: prefs.location,
+
+      // Metadata
+      status: "OPEN",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      applicantsCount: 0,
+      viewsCount: 0,
+      isActive: true,
+    };
+
+    try {
+      const response = await fetch("http://localhost:3000/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(postData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit request");
+      }
+
+      setSubmitted(true);
+    } catch (error) {
+      setSubmitError(
+        error.message || "Something went wrong. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   /* ══════════════════════════ SUCCESS SCREEN ══════════════════════════ */
   if (submitted) {
@@ -116,19 +384,36 @@ const PostRequest = () => {
             soon. You'll be notified when someone offers to help.
           </p>
           <div className="pr-success-actions">
-            <Link to="/find-requests" className="pr-success-btn pr-success-btn--primary">
-              <IoSearchOutline /> Browse All Requests
+            <Link to="/" className="pr-success-btn pr-success-btn--outline">
+              <IoArrowBack /> Back to Home
+            </Link>
+            <Link
+              to="/find-requests"
+              className="pr-success-btn pr-success-btn--primary"
+            >
+              <IoSearchOutline /> Browse my Requests
             </Link>
             <button
               className="pr-success-btn pr-success-btn--outline"
               onClick={() => {
                 setSubmitted(false);
                 setStep(1);
-                setDetails({ title: "", category: "", description: "", tags: [], tagInput: "" });
-                setPrefs({ points: "", deadline: "1 week", urgency: "medium", location: "Remote" });
+                setDetails({
+                  title: "",
+                  category: "",
+                  description: "",
+                  tags: [],
+                  tagInput: "",
+                });
+                setPrefs({
+                  points: "",
+                  deadline: "24 hours",
+                  urgency: "MEDIUM",
+                  location: "Remote",
+                });
               }}
             >
-              Post Another Request
+              <IoAddOutline /> Post Another Request
             </button>
           </div>
         </div>
@@ -140,7 +425,6 @@ const PostRequest = () => {
   return (
     <div className="pr-page">
       <div className="pr-container">
-
         {/* ── Header ── */}
         <div className="pr-header">
           <Link to="/find-requests" className="pr-back-link">
@@ -208,11 +492,15 @@ const PostRequest = () => {
                   id="pr-category"
                   className="pr-select"
                   value={details.category}
-                  onChange={(e) => handleDetailsChange("category", e.target.value)}
+                  onChange={(e) =>
+                    handleDetailsChange("category", e.target.value)
+                  }
                 >
                   <option value="">Select a category…</option>
                   {CATEGORIES.map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -229,7 +517,9 @@ const PostRequest = () => {
                 rows={6}
                 placeholder="Describe the task in detail. Include what you need done, any specific requirements, and what the helper will receive/need to deliver…"
                 value={details.description}
-                onChange={(e) => handleDetailsChange("description", e.target.value)}
+                onChange={(e) =>
+                  handleDetailsChange("description", e.target.value)
+                }
               />
               <div className="pr-char-count">
                 {details.description.length} characters · Min 50
@@ -240,37 +530,54 @@ const PostRequest = () => {
             <div className="pr-form-group">
               <label>
                 Skill Tags{" "}
-                <span className="pr-label-hint">(up to 8 – helps helpers find your request)</span>
+                <span className="pr-label-hint">
+                  (up to 8 – helps helpers find your request)
+                </span>
               </label>
-              <div className="pr-tag-input-row">
+              <div className="pr-skill-select-wrapper">
                 <input
                   type="text"
                   className="pr-input"
-                  placeholder='e.g. "React", "Figma", "Copywriting" …'
+                  placeholder={
+                    details.category
+                      ? "Search and select skills..."
+                      : "Please select a category first"
+                  }
                   value={details.tagInput}
-                  onChange={(e) => handleDetailsChange("tagInput", e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addTag();
-                    }
+                  onChange={(e) => {
+                    handleDetailsChange("tagInput", e.target.value);
+                    setShowSkillDropdown(true);
                   }}
+                  onFocus={() => setShowSkillDropdown(true)}
+                  onBlur={() =>
+                    setTimeout(() => setShowSkillDropdown(false), 200)
+                  }
+                  disabled={!details.category || details.tags.length >= 8}
                 />
-                <button
-                  type="button"
-                  className="pr-add-tag-btn"
-                  onClick={addTag}
-                  disabled={!details.tagInput.trim()}
-                >
-                  <IoAddOutline /> Add
-                </button>
+                {showSkillDropdown && filteredSkills.length > 0 && (
+                  <div className="pr-skill-dropdown">
+                    {filteredSkills.slice(0, 10).map((skill) => (
+                      <div
+                        key={skill}
+                        className="pr-skill-option"
+                        onMouseDown={() => selectTag(skill)}
+                      >
+                        {skill}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               {details.tags.length > 0 && (
                 <div className="pr-tags-preview">
                   {details.tags.map((tag) => (
                     <span key={tag} className="pr-tag-chip">
                       {tag}
-                      <button onClick={() => removeTag(tag)} className="pr-tag-remove" type="button">
+                      <button
+                        onClick={() => removeTag(tag)}
+                        className="pr-tag-remove"
+                        type="button"
+                      >
                         <IoClose />
                       </button>
                     </span>
@@ -303,8 +610,8 @@ const PostRequest = () => {
             {/* Reward Points */}
             <div className="pr-form-group">
               <label htmlFor="pr-points">
-                <IoFlashOutline className="pr-label-icon" /> Reward Points Offered{" "}
-                <span className="pr-required">*</span>
+                <IoFlashOutline className="pr-label-icon" /> Reward Points
+                Offered <span className="pr-required">*</span>
               </label>
               <div className="pr-pts-input-wrap">
                 <input
@@ -319,9 +626,22 @@ const PostRequest = () => {
                 />
                 <span className="pr-pts-suffix">pts</span>
               </div>
+              <div className="pr-pts-suggestions">
+                {[20, 30, 50, 100, 150, 200].map((pts) => (
+                  <button
+                    key={pts}
+                    type="button"
+                    className={`pr-pts-suggestion-btn${prefs.points === String(pts) ? " active" : ""}`}
+                    onClick={() => handlePrefsChange("points", String(pts))}
+                  >
+                    {pts} pts
+                  </button>
+                ))}
+              </div>
               <div className="pr-tip">
                 <IoInformationCircleOutline className="pr-tip-icon" />
-                Higher points attract more experienced helpers. Consider what the task is worth.
+                Higher points attract more experienced helpers. Consider what
+                the task is worth.
               </div>
             </div>
 
@@ -335,10 +655,14 @@ const PostRequest = () => {
                   id="pr-deadline"
                   className="pr-select"
                   value={prefs.deadline}
-                  onChange={(e) => handlePrefsChange("deadline", e.target.value)}
+                  onChange={(e) =>
+                    handlePrefsChange("deadline", e.target.value)
+                  }
                 >
                   {DEADLINE_OPTIONS.map((d) => (
-                    <option key={d} value={d}>{d}</option>
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -368,7 +692,8 @@ const PostRequest = () => {
             {/* Location */}
             <div className="pr-form-group">
               <label htmlFor="pr-location">
-                <IoLocationOutline className="pr-label-icon" /> Location Preference
+                <IoLocationOutline className="pr-label-icon" /> Location
+                Preference
               </label>
               <div className="pr-location-grid">
                 {["Remote", "Local", "Online", "Flexible"].map((loc) => (
@@ -385,7 +710,10 @@ const PostRequest = () => {
             </div>
 
             <div className="pr-form-actions">
-              <button className="pr-back-btn-secondary" onClick={() => setStep(1)}>
+              <button
+                className="pr-back-btn-secondary"
+                onClick={() => setStep(1)}
+              >
                 <IoArrowBack /> Back
               </button>
               <button
@@ -409,11 +737,18 @@ const PostRequest = () => {
 
             <div className="pr-preview-card">
               {/* Urgency */}
-              {prefs.urgency === "high" && (
+              {prefs.urgency === "CRITICAL" && (
+                <div className="pr-preview-urgency pr-preview-urgency--critical">
+                  🚨 Critical
+                </div>
+              )}
+              {prefs.urgency === "HIGH" && (
                 <div className="pr-preview-urgency">🔥 Urgent</div>
               )}
-              {prefs.urgency === "medium" && (
-                <div className="pr-preview-urgency pr-preview-urgency--medium">⏳ Medium Priority</div>
+              {prefs.urgency === "MEDIUM" && (
+                <div className="pr-preview-urgency pr-preview-urgency--medium">
+                  ⏳ Medium Priority
+                </div>
               )}
 
               {/* Header */}
@@ -446,7 +781,9 @@ const PostRequest = () => {
               {details.tags.length > 0 && (
                 <div className="pr-preview-tags">
                   {details.tags.map((tag) => (
-                    <span key={tag} className="pr-preview-tag">{tag}</span>
+                    <span key={tag} className="pr-preview-tag">
+                      {tag}
+                    </span>
                   ))}
                 </div>
               )}
@@ -473,13 +810,29 @@ const PostRequest = () => {
             </div>
 
             <div className="pr-form-actions">
-              <button className="pr-back-btn-secondary" onClick={() => setStep(2)}>
+              <button
+                className="pr-back-btn-secondary"
+                onClick={() => setStep(2)}
+              >
                 <IoArrowBack /> Edit Preferences
               </button>
-              <button className="pr-submit-btn" onClick={handleSubmit}>
-                <IoHandLeftOutline /> Post Request
+              <button
+                className="pr-submit-btn"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  "Posting..."
+                ) : (
+                  <>
+                    <IoHandLeftOutline /> Post Request
+                  </>
+                )}
               </button>
             </div>
+            {submitError && (
+              <div className="pr-submit-error">{submitError}</div>
+            )}
           </div>
         )}
       </div>

@@ -12,6 +12,43 @@
   padding: 0 24px;
 }
 
+/* ── Loading & Error States ── */
+.sd-loading,
+.sd-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  gap: 16px;
+}
+
+.sd-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #14a800;
+  border-radius: 50%;
+  animation: sd-spin 0.8s linear infinite;
+}
+
+@keyframes sd-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sd-error h2 {
+  color: #333;
+  margin: 0;
+}
+
+.sd-error p {
+  color: #666;
+  margin: 0;
+}
+
 /* ── Breadcrumb ── */
 .sd-breadcrumb {
   display: flex;
@@ -204,9 +241,18 @@
   letter-spacing: 0.5px;
 }
 
-.sd-badge--gold { background: #fff8e6; color: #ca8a04; }
-.sd-badge--blue { background: #eff6ff; color: #1d4ed8; }
-.sd-badge--green { background: #f0faf0; color: #14a800; }
+.sd-badge--gold {
+  background: #fff8e6;
+  color: #ca8a04;
+}
+.sd-badge--blue {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+.sd-badge--green {
+  background: #f0faf0;
+  color: #14a800;
+}
 
 .sd-stat-pill {
   display: inline-flex;
@@ -456,7 +502,7 @@
 }
 
 .sd-review-card:hover {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
 
 .sd-review-header {
@@ -537,7 +583,7 @@
 
 .sd-cta-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(20,168,0,0.3);
+  box-shadow: 0 8px 24px rgba(20, 168, 0, 0.3);
 }
 
 .sd-contact-btn {
@@ -774,6 +820,183 @@
   font-size: 11px;
   color: #aaa;
   font-weight: 500;
+}
+
+/* ══════ Hire Request Modal ══════ */
+.sd-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: sd-fade-in 0.2s ease;
+}
+
+@keyframes sd-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sd-modal {
+  background: #fff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 520px;
+  padding: 32px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: sd-slide-up 0.25s ease;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes sd-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sd-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1.5px solid #e0e0e0;
+  background: #fff;
+  font-size: 20px;
+  color: #888;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.sd-modal-close:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: #fff5f5;
+}
+
+.sd-modal-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #001e00;
+  margin-bottom: 4px;
+}
+
+.sd-modal-subtitle {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 24px;
+}
+
+.sd-modal-subtitle strong {
+  color: #001e00;
+}
+
+.sd-modal-pkg-summary {
+  background: #f9fbf9;
+  border: 1px solid #e8f5e8;
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sd-modal-pkg-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sd-modal-pkg-label {
+  font-size: 13px;
+  color: #888;
+  font-weight: 500;
+}
+
+.sd-modal-pkg-value {
+  font-size: 14px;
+  color: #001e00;
+  font-weight: 600;
+  max-width: 60%;
+  text-align: right;
+}
+
+.sd-modal-pkg-pts {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #14a800;
+  font-weight: 700;
+}
+
+.sd-modal-field {
+  margin-bottom: 24px;
+}
+
+.sd-modal-field label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #001e00;
+  margin-bottom: 8px;
+}
+
+.sd-modal-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #333;
+  resize: vertical;
+  transition: border-color 0.2s;
+  background: #fafafa;
+}
+
+.sd-modal-textarea:focus {
+  outline: none;
+  border-color: #14a800;
+  background: #fff;
+}
+
+.sd-modal-textarea::placeholder {
+  color: #aaa;
+}
+
+.sd-modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.sd-modal-actions .sd-contact-btn {
+  flex: 1;
+  margin: 0;
+}
+
+.sd-modal-actions .sd-cta-btn {
+  flex: 1;
+  margin: 0;
 }
 
 /* ═══════════════  RESPONSIVE  ═══════════════ */

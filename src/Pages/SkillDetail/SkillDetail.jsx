@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link, useParams, useNavigate } from "react-router";
+import { AuthContext } from "../../Authentication/AuthContext";
+import { messagesApi } from "../../utils/messagesApi";
+import toast from "react-hot-toast";
 import {
   IoArrowBack,
   IoStarSharp,
@@ -16,214 +19,241 @@ import {
   IoChevronUp,
   IoCheckmark,
   IoChatbubbleOutline,
+  IoClose,
 } from "react-icons/io5";
 import "./SkillDetail.css";
 
-/* ─── Mock Data (mirrors SkillMarketplace data) ─────── */
-const skillsData = {
-  "1": {
-    id: "1",
-    category: "Development & IT",
-    title: "Full-Stack Web Development",
-    provider: "Arjun Patel",
-    initials: "AP",
-    avatarColor: "#14a800",
-    memberSince: "Jan 2023",
-    location: "Mumbai, India",
-    rating: 4.9,
-    reviews: 312,
-    rewardPts: 120,
-    deliveryDays: 3,
-    tags: ["React", "Node.js", "MongoDB"],
-    badge: "Top Rated",
-    verified: true,
-    helpfulness: "98%",
-    tasksCompleted: 87,
-    description:
-      "I'll build your complete web app with React frontend and Node.js/Express backend. API integration, auth, and deployment included. Whether you need a simple portfolio, e-commerce platform, or complex SaaS dashboard — I've got you covered.",
-    packages: [
-      {
-        name: "Starter",
-        pts: 60,
-        delivery: 5,
-        revisions: 1,
-        features: [
-          "Landing page (1 page)",
-          "Responsive design",
-          "Contact form",
-          "1 revision",
-        ],
-      },
-      {
-        name: "Standard",
-        pts: 120,
-        delivery: 3,
-        revisions: 3,
-        features: [
-          "Multi-page site (up to 5 pages)",
-          "React + Node.js",
-          "Database integration",
-          "Auth system",
-          "3 revisions",
-        ],
-        popular: true,
-      },
-      {
-        name: "Premium",
-        pts: 220,
-        delivery: 7,
-        revisions: 999,
-        features: [
-          "Full SaaS MVP",
-          "Admin dashboard",
-          "Payment integration",
-          "CI/CD pipeline",
-          "Unlimited revisions",
-          "30-day support",
-        ],
-      },
-    ],
-    faqs: [
-      {
-        q: "What technologies do you use?",
-        a: "Primarily React, TypeScript, Node.js, Express, and MongoDB or PostgreSQL depending on your needs.",
-      },
-      {
-        q: "Can you work with existing codebases?",
-        a: "Absolutely! I can extend, refactor, or debug existing projects. Just share the repo details.",
-      },
-      {
-        q: "Do you offer post-delivery support?",
-        a: "The Premium package includes 30 days of support. For other packages, you can negotiate additional support.",
-      },
-    ],
-    testimonials: [
-      {
-        author: "Priya Sharma",
-        initials: "PS",
-        color: "#7c3aed",
-        rating: 5,
-        text: "Arjun delivered an outstanding dashboard. Clean code, on time, and great communication throughout.",
-        date: "2 weeks ago",
-      },
-      {
-        author: "Tom Erikson",
-        initials: "TE",
-        color: "#0891b2",
-        rating: 5,
-        text: "Best experience on this platform! He went above and beyond — even added features I hadn't asked for.",
-        date: "1 month ago",
-      },
-      {
-        author: "Riya Mehta",
-        initials: "RM",
-        color: "#ea580c",
-        rating: 4,
-        text: "Very professional and skilled. Minor delay on delivery but the quality made up for it.",
-        date: "1 month ago",
-      },
-    ],
-  },
-  "2": {
-    id: "2",
-    category: "Design & Creative",
-    title: "UI/UX Design & Figma Prototyping",
-    provider: "Sneha Kapoor",
-    initials: "SK",
-    avatarColor: "#7c3aed",
-    memberSince: "Mar 2022",
-    location: "Bangalore, India",
-    rating: 4.95,
-    reviews: 218,
-    rewardPts: 90,
-    deliveryDays: 2,
-    tags: ["Figma", "Wireframing", "Prototyping"],
-    badge: "Rising Talent",
-    verified: true,
-    helpfulness: "99%",
-    tasksCompleted: 63,
-    description:
-      "Get stunning, user-centered UI/UX designs with full Figma files, style guides, and interactive prototypes. I follow design thinking principles and can help from ideation all the way to developer handoff.",
-    packages: [
-      {
-        name: "Basic",
-        pts: 45,
-        delivery: 2,
-        revisions: 1,
-        features: ["3 screen designs", "Basic style guide", "1 revision"],
-      },
-      {
-        name: "Standard",
-        pts: 90,
-        delivery: 3,
-        revisions: 3,
-        features: [
-          "10 screen designs",
-          "Full style guide",
-          "Interactive prototype",
-          "3 revisions",
-        ],
-        popular: true,
-      },
-      {
-        name: "Pro",
-        pts: 180,
-        delivery: 7,
-        revisions: 999,
-        features: [
-          "Full app design (30+ screens)",
-          "Comprehensive design system",
-          "Developer handoff kit",
-          "Usability review",
-          "Unlimited revisions",
-        ],
-      },
-    ],
-    faqs: [
-      {
-        q: "What file formats do you deliver?",
-        a: "You'll receive Figma source files, exported assets (PNG/SVG), and a PDF style guide.",
-      },
-      {
-        q: "Do you do user research?",
-        a: "The Pro package includes a quick usability review. Full user research can be added for extra points.",
-      },
-    ],
-    testimonials: [
-      {
-        author: "Lakshmi Nair",
-        initials: "LN",
-        color: "#14a800",
-        rating: 5,
-        text: "Sneha's designs are absolutely gorgeous and she really understood our brand. Highly recommend!",
-        date: "3 days ago",
-      },
-      {
-        author: "James Carter",
-        initials: "JC",
-        color: "#ea580c",
-        rating: 5,
-        text: "Delivered a pixel-perfect Figma prototype on time. Our dev team loved the handoff files.",
-        date: "2 weeks ago",
-      },
-    ],
-  },
+// Generate consistent avatar color from name
+const generateAvatarColor = (name) => {
+  const colors = [
+    "#6366f1",
+    "#8b5cf6",
+    "#ec4899",
+    "#f43f5e",
+    "#f97316",
+    "#eab308",
+    "#22c55e",
+    "#14b8a6",
+  ];
+  const hash = (name || "")
+    .split("")
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return colors[hash % colors.length];
 };
 
-// Fallback skill for IDs not in our mock
-const defaultSkill = skillsData["1"];
+// Transform API data to component format
+const transformSkillData = (apiData) => {
+  const sellerName = apiData.seller?.name || "Unknown";
+  const initials = sellerName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return {
+    id: apiData._id,
+    category: apiData.category,
+    title: apiData.title,
+    provider: sellerName,
+    sellerId: apiData.seller?.id || null,
+    providerEmail: apiData.seller?.email,
+    providerPhoto: apiData.seller?.photoURL,
+    initials: initials,
+    avatarColor: generateAvatarColor(sellerName),
+    memberSince: new Date(apiData.createdAt).toLocaleDateString("en-US", {
+      month: "short",
+      year: "numeric",
+    }),
+    location: "Online",
+    rating: apiData.rating || 4.5,
+    reviews: apiData.reviews || 0,
+    rewardPts: apiData.packages?.[0]?.price || 0,
+    deliveryDays: apiData.packages?.[0]?.deliveryDays || 7,
+    tags: apiData.tags || [],
+    badge: apiData.status === "active" ? null : null,
+    verified: apiData.status === "active",
+    helpfulness: "95%",
+    tasksCompleted: apiData.tasksCompleted || 0,
+    description: apiData.description,
+    packages: (apiData.packages || []).map((pkg) => ({
+      name: pkg.name,
+      pts: pkg.price,
+      delivery: pkg.deliveryDays,
+      revisions:
+        pkg.revisions === "Unlimited" ? 999 : parseInt(pkg.revisions) || 1,
+      features: pkg.features || [],
+      popular: pkg.name === "Standard",
+    })),
+    faqs: apiData.faqs || [
+      {
+        q: "How do I get started?",
+        a: "Simply select a package and click 'Request this Skill'. The provider will get back to you shortly.",
+      },
+      {
+        q: "What if I'm not satisfied?",
+        a: "We have a reward protection system in place. If the work doesn't meet the agreed requirements, you can request a refund.",
+      },
+    ],
+    testimonials: apiData.testimonials || [],
+  };
+};
 
 /* ─── Component ─────────────────────────────────────── */
 const SkillDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const skill = skillsData[id] || { ...defaultSkill, id };
+  const { user } = useContext(AuthContext);
 
-  const [selectedPackage, setSelectedPackage] = useState(1); // index
+  const [skill, setSkill] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedPackage, setSelectedPackage] = useState(1);
   const [openFaq, setOpenFaq] = useState(null);
   const [wishlist, setWishlist] = useState(false);
+  const [messagingLoading, setMessagingLoading] = useState(false);
+  const [showHireModal, setShowHireModal] = useState(false);
+  const [hireMessage, setHireMessage] = useState("");
+  const [hireSubmitting, setHireSubmitting] = useState(false);
 
-  const pkg = skill.packages[selectedPackage];
+  const handleHireClick = () => {
+    if (!user) {
+      toast.error("Please sign in to request hiring");
+      return navigate("/signin");
+    }
+    if (skill?.sellerId === user.uid) {
+      return toast.error("You cannot hire yourself");
+    }
+    setShowHireModal(true);
+  };
+
+  const handleHireSubmit = async () => {
+    if (!hireMessage.trim()) {
+      return toast.error("Please describe what you need");
+    }
+    setHireSubmitting(true);
+    try {
+      const pkg = skill.packages[selectedPackage] || skill.packages[0];
+      const res = await fetch("http://localhost:3000/hire-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          skillId: skill.id,
+          skillTitle: skill.title,
+          package: pkg.name,
+          rewardPoints: pkg.pts,
+          deliveryDays: pkg.delivery,
+          message: hireMessage.trim(),
+          client: {
+            uid: user.uid,
+            name: user.displayName,
+            email: user.email,
+            photoURL: user.photoURL,
+          },
+          provider: {
+            uid: skill.sellerId,
+            name: skill.provider,
+            email: skill.providerEmail,
+            photoURL: skill.providerPhoto,
+          },
+          status: "pending",
+          createdAt: new Date().toISOString(),
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to send request");
+      toast.success("Hire request sent successfully!");
+      setShowHireModal(false);
+      setHireMessage("");
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "Something went wrong");
+    } finally {
+      setHireSubmitting(false);
+    }
+  };
+
+  const handleMessageProvider = async () => {
+    if (!user) {
+      toast.error("Please sign in to message this provider");
+      return navigate("/signin");
+    }
+    if (!skill) return;
+
+    const sellerUid = skill.sellerId;
+    if (!sellerUid) {
+      return toast.error("Cannot message this provider");
+    }
+    if (sellerUid === user.uid) {
+      return toast.error("This is your own skill");
+    }
+
+    setMessagingLoading(true);
+    try {
+      const { conversationId } = await messagesApi.findOrCreateConversation({
+        myUid: user.uid,
+        myName: user.displayName,
+        myPhoto: user.photoURL,
+        myEmail: user.email,
+        otherUid: sellerUid,
+        otherName: skill.provider,
+        otherPhoto: skill.providerPhoto,
+        otherEmail: skill.providerEmail,
+      });
+      navigate(`/dashboard/messages?c=${encodeURIComponent(conversationId)}`);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to start conversation");
+    } finally {
+      setMessagingLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(`http://localhost:3000/skills/${id}`)
+      .then((response) => {
+        if (!response.ok) throw new Error("Skill not found");
+        return response.json();
+      })
+      .then((data) => {
+        setSkill(transformSkillData(data));
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="skill-detail-page">
+        <div className="sd-container sd-loading">
+          <div className="sd-spinner"></div>
+          <p>Loading skill details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !skill) {
+    return (
+      <div className="skill-detail-page">
+        <div className="sd-container sd-error">
+          <h2>Skill Not Found</h2>
+          <p>{error || "The skill you're looking for doesn't exist."}</p>
+          <button
+            onClick={() => navigate("/skill-marketplace")}
+            className="sd-cta-btn"
+          >
+            Back to Marketplace
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const pkg = skill.packages[selectedPackage] || skill.packages[0];
 
   const renderStars = (rating) =>
     [...Array(5)].map((_, i) =>
@@ -231,7 +261,7 @@ const SkillDetail = () => {
         <IoStarSharp key={i} className="sd-star-filled" />
       ) : (
         <IoStar key={i} className="sd-star-empty" />
-      )
+      ),
     );
 
   return (
@@ -273,7 +303,9 @@ const SkillDetail = () => {
                   <span>
                     <IoStarSharp className="sd-meta-star" />
                     <strong>{skill.rating}</strong>
-                    <span className="sd-meta-muted">({skill.reviews} reviews)</span>
+                    <span className="sd-meta-muted">
+                      ({skill.reviews} reviews)
+                    </span>
                   </span>
                   <span className="sd-dot">·</span>
                   <span>{skill.tasksCompleted} tasks completed</span>
@@ -306,8 +338,8 @@ const SkillDetail = () => {
                     skill.badge === "Top Rated"
                       ? "sd-badge--gold"
                       : skill.badge === "Expert"
-                      ? "sd-badge--blue"
-                      : "sd-badge--green"
+                        ? "sd-badge--blue"
+                        : "sd-badge--green"
                   }`}
                 >
                   {skill.badge === "Top Rated" && <IoTrophyOutline />}
@@ -370,11 +402,16 @@ const SkillDetail = () => {
                     </li>
                   ))}
                 </ul>
-                <button className="sd-cta-btn">
-                  <IoFlashOutline /> Request this Skill
+                <button className="sd-cta-btn" onClick={handleHireClick}>
+                  <IoFlashOutline /> Request to hire
                 </button>
-                <button className="sd-contact-btn">
-                  <IoChatbubbleOutline /> Message Provider
+                <button
+                  className="sd-contact-btn"
+                  onClick={handleMessageProvider}
+                  disabled={messagingLoading}
+                >
+                  <IoChatbubbleOutline />{" "}
+                  {messagingLoading ? "Opening..." : "Message Provider"}
                 </button>
               </div>
             </div>
@@ -447,7 +484,9 @@ const SkillDetail = () => {
                   onClick={() => setSelectedPackage(i)}
                 >
                   {p.name}
-                  {p.popular && <span className="sd-popular-badge">Popular</span>}
+                  {p.popular && (
+                    <span className="sd-popular-badge">Popular</span>
+                  )}
                 </button>
               ))}
             </div>
@@ -460,7 +499,9 @@ const SkillDetail = () => {
                 <span className="sd-order-pts-label">reward points</span>
               </div>
               <p className="sd-order-delivery">
-                <IoTimeOutline /> Delivered in {pkg.delivery} days · {pkg.revisions === 999 ? "Unlimited" : pkg.revisions} revision{pkg.revisions !== 1 ? "s" : ""}
+                <IoTimeOutline /> Delivered in {pkg.delivery} days ·{" "}
+                {pkg.revisions === 999 ? "Unlimited" : pkg.revisions} revision
+                {pkg.revisions !== 1 ? "s" : ""}
               </p>
 
               {/* Features */}
@@ -474,11 +515,19 @@ const SkillDetail = () => {
               </ul>
 
               {/* CTAs */}
-              <button className="sd-cta-btn sd-cta-btn--full">
-                <IoFlashOutline /> Request this Skill
+              <button
+                className="sd-cta-btn sd-cta-btn--full"
+                onClick={handleHireClick}
+              >
+                <IoFlashOutline /> Request to hire
               </button>
-              <button className="sd-contact-btn sd-contact-btn--full">
-                <IoChatbubbleOutline /> Message Provider
+              <button
+                className="sd-contact-btn sd-contact-btn--full"
+                onClick={handleMessageProvider}
+                disabled={messagingLoading}
+              >
+                <IoChatbubbleOutline />{" "}
+                {messagingLoading ? "Opening..." : "Message Provider"}
               </button>
 
               {/* Trust Badges */}
@@ -504,7 +553,9 @@ const SkillDetail = () => {
                   {skill.initials}
                 </div>
                 <div>
-                  <span className="sd-provider-mini-name">{skill.provider}</span>
+                  <span className="sd-provider-mini-name">
+                    {skill.provider}
+                  </span>
                   <span className="sd-provider-mini-since">
                     Member since {skill.memberSince}
                   </span>
@@ -520,7 +571,9 @@ const SkillDetail = () => {
                   <span className="sd-mini-stat-label">Helpfulness</span>
                 </div>
                 <div className="sd-mini-stat">
-                  <span className="sd-mini-stat-val">{skill.tasksCompleted}</span>
+                  <span className="sd-mini-stat-val">
+                    {skill.tasksCompleted}
+                  </span>
                   <span className="sd-mini-stat-label">Completed</span>
                 </div>
               </div>
@@ -528,6 +581,85 @@ const SkillDetail = () => {
           </aside>
         </div>
       </div>
+
+      {/* ══════ Hire Request Modal ══════ */}
+      {showHireModal && (
+        <div
+          className="sd-modal-overlay"
+          onClick={() => setShowHireModal(false)}
+        >
+          <div className="sd-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="sd-modal-close"
+              onClick={() => setShowHireModal(false)}
+            >
+              <IoClose />
+            </button>
+
+            <h2 className="sd-modal-title">Request to Hire</h2>
+            <p className="sd-modal-subtitle">
+              Send a hire request to <strong>{skill.provider}</strong>
+            </p>
+
+            {/* Selected Package Summary */}
+            <div className="sd-modal-pkg-summary">
+              <div className="sd-modal-pkg-row">
+                <span className="sd-modal-pkg-label">Skill</span>
+                <span className="sd-modal-pkg-value">{skill.title}</span>
+              </div>
+              <div className="sd-modal-pkg-row">
+                <span className="sd-modal-pkg-label">Package</span>
+                <span className="sd-modal-pkg-value">{pkg.name}</span>
+              </div>
+              <div className="sd-modal-pkg-row">
+                <span className="sd-modal-pkg-label">Reward Points</span>
+                <span className="sd-modal-pkg-value sd-modal-pkg-pts">
+                  <IoFlashOutline /> {pkg.pts} pts
+                </span>
+              </div>
+              <div className="sd-modal-pkg-row">
+                <span className="sd-modal-pkg-label">Delivery</span>
+                <span className="sd-modal-pkg-value">{pkg.delivery} days</span>
+              </div>
+            </div>
+
+            {/* Message */}
+            <div className="sd-modal-field">
+              <label htmlFor="sd-hire-msg">Describe what you need</label>
+              <textarea
+                id="sd-hire-msg"
+                className="sd-modal-textarea"
+                rows={4}
+                placeholder="Tell the provider what you need help with, any specific requirements, deadlines, etc."
+                value={hireMessage}
+                onChange={(e) => setHireMessage(e.target.value)}
+              />
+            </div>
+
+            <div className="sd-modal-actions">
+              <button
+                className="sd-contact-btn"
+                onClick={() => setShowHireModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="sd-cta-btn"
+                onClick={handleHireSubmit}
+                disabled={hireSubmitting}
+              >
+                {hireSubmitting ? (
+                  "Sending..."
+                ) : (
+                  <>
+                    <IoFlashOutline /> Send Request
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

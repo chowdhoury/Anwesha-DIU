@@ -1,11 +1,10 @@
-import React, { useState, useMemo } from "react";
-import { Link } from "react-router";
+import React, { useState, useMemo, useEffect } from "react";
+import { Link, useSearchParams } from "react-router";
 import {
   IoSearch,
   IoFilterOutline,
   IoStarSharp,
   IoTimeOutline,
-  IoPersonOutline,
   IoTrophyOutline,
   IoStorefrontOutline,
   IoArrowForward,
@@ -23,6 +22,7 @@ import {
   FaBullhorn,
   FaChartLine,
   FaHeadset,
+  FaFileAlt,
   FaMobileAlt,
   FaRobot,
 } from "react-icons/fa";
@@ -31,15 +31,25 @@ import "./SkillMarketplace.css";
 /* ─── Static Data ─────────────────────────────────── */
 const categories = [
   { key: "all", label: "All Skills", icon: <IoGridOutline /> },
-  { key: "dev", label: "Development", icon: <FaCode /> },
-  { key: "design", label: "Design", icon: <FaPaintBrush /> },
-  { key: "writing", label: "Writing", icon: <FaPenFancy /> },
-  { key: "marketing", label: "Marketing", icon: <FaBullhorn /> },
-  { key: "finance", label: "Finance", icon: <FaChartLine /> },
-  { key: "support", label: "Support", icon: <FaHeadset /> },
+  { key: "dev", label: "Development & IT", icon: <FaCode /> },
+  { key: "design", label: "Design & Creative", icon: <FaPaintBrush /> },
+  { key: "writing", label: "Writing & Translation", icon: <FaPenFancy /> },
+  { key: "marketing", label: "Sales & Marketing", icon: <FaBullhorn /> },
+  { key: "finance", label: "Finance & Accounting", icon: <FaChartLine /> },
+  { key: "support", label: "Admin & Customer Support", icon: <FaHeadset /> },
+  {
+    key: "engineering",
+    label: "Engineering & Architecture",
+    icon: <FaFileAlt />,
+  },
   { key: "mobile", label: "Mobile", icon: <FaMobileAlt /> },
-  { key: "ai", label: "AI / ML", icon: <FaRobot /> },
+  { key: "ai", label: "AI & Machine Learning", icon: <FaRobot /> },
 ];
+
+const categoryQueryMap = categories.reduce((accumulator, category) => {
+  accumulator[category.label.toLowerCase()] = category.key;
+  return accumulator;
+}, {});
 
 const SORT_OPTIONS = [
   { value: "popular", label: "Most Popular" },
@@ -49,217 +59,95 @@ const SORT_OPTIONS = [
   { value: "high", label: "Highest Reward" },
 ];
 
-const skills = [
-  {
-    id: "1",
-    category: "dev",
-    title: "Full-Stack Web Development",
-    provider: "Tanvir Ahmed",
-    initials: "TA",
-    avatarColor: "#14a800",
-    rating: 4.9,
-    reviews: 312,
-    rewardPts: 120,
-    deliveryDays: 3,
-    tags: ["React", "Node.js", "MongoDB"],
-    badge: "Top Rated",
-    verified: true,
-    description:
-      "I'll build your complete web app with React frontend and Node.js/Express backend. API integration, auth, and deployment included.",
-  },
-  {
-    id: "2",
-    category: "design",
-    title: "UI/UX Design & Figma Prototyping",
-    provider: "Nusrat Jahan",
-    initials: "NJ",
-    avatarColor: "#7c3aed",
-    rating: 4.95,
-    reviews: 218,
-    rewardPts: 90,
-    deliveryDays: 2,
-    tags: ["Figma", "Wireframing", "Prototyping"],
-    badge: "Rising Talent",
-    verified: true,
-    description:
-      "Get stunning, user-centered UI/UX designs with full Figma files, style guides, and interactive prototypes.",
-  },
-  {
-    id: "3",
-    category: "writing",
-    title: "Technical Blog Writing & SEO",
-    provider: "Sumaiya Khatun",
-    initials: "SK",
-    avatarColor: "#0891b2",
-    rating: 4.8,
-    reviews: 145,
-    rewardPts: 50,
-    deliveryDays: 2,
-    tags: ["SEO", "Blog Posts", "Technical Writing"],
-    badge: null,
-    verified: true,
-    description:
-      "Well-researched, SEO-optimized technical articles and blog posts. Niche topics welcome.",
-  },
-  {
-    id: "4",
-    category: "marketing",
-    title: "Social Media Strategy & Growth",
-    provider: "Sakib Rahman",
-    initials: "SR",
-    avatarColor: "#ea580c",
-    rating: 4.7,
-    reviews: 99,
-    rewardPts: 70,
-    deliveryDays: 4,
-    tags: ["Instagram", "TikTok", "Content Calendar"],
-    badge: null,
-    verified: false,
-    description:
-      "Full social media audit, content strategy, and a 30-day growth plan tailored to your brand.",
-  },
-  {
-    id: "5",
-    category: "ai",
-    title: "Python ML Model Training & Deployment",
-    provider: "Rafiqul Islam",
-    initials: "RI",
-    avatarColor: "#db2777",
-    rating: 4.92,
-    reviews: 67,
-    rewardPts: 200,
-    deliveryDays: 7,
-    tags: ["Python", "TensorFlow", "FastAPI"],
-    badge: "Expert",
-    verified: true,
-    description:
-      "I'll train, evaluate, and deploy your custom ML model with a REST API. Includes documentation.",
-  },
-  {
-    id: "6",
-    category: "dev",
-    title: "WordPress Site Development",
-    provider: "Farhan Hossain",
-    initials: "FH",
-    avatarColor: "#0369a1",
-    rating: 4.75,
-    reviews: 423,
-    rewardPts: 60,
-    deliveryDays: 3,
-    tags: ["WordPress", "Elementor", "WooCommerce"],
-    badge: "Top Rated",
-    verified: true,
-    description:
-      "Custom WordPress websites with responsive design, plugin setup, and speed optimization.",
-  },
-  {
-    id: "7",
-    category: "design",
-    title: "Logo & Brand Identity Design",
-    provider: "Tasnim Akter",
-    initials: "TA",
-    avatarColor: "#d97706",
-    rating: 4.88,
-    reviews: 188,
-    rewardPts: 80,
-    deliveryDays: 2,
-    tags: ["Logo", "Branding", "Adobe Illustrator"],
-    badge: "Rising Talent",
-    verified: true,
-    description:
-      "Modern logo design with brand guidelines: color palette, typography, and usage rules.",
-  },
-  {
-    id: "8",
-    category: "mobile",
-    title: "Flutter Cross-Platform App Dev",
-    provider: "Maruf Hasan",
-    initials: "MH",
-    avatarColor: "#059669",
-    rating: 4.85,
-    reviews: 134,
-    rewardPts: 150,
-    deliveryDays: 5,
-    tags: ["Flutter", "Firebase", "iOS & Android"],
-    badge: "Expert",
-    verified: true,
-    description:
-      "Build a beautiful, performant Flutter app for both iOS and Android from a single codebase.",
-  },
-  {
-    id: "9",
-    category: "finance",
-    title: "Financial Modeling & Excel Dashboards",
-    provider: "Shahinur Rahman",
-    initials: "SR",
-    avatarColor: "#7c3aed",
-    rating: 4.82,
-    reviews: 76,
-    rewardPts: 110,
-    deliveryDays: 3,
-    tags: ["Excel", "DCF", "Financial Modeling"],
-    badge: null,
-    verified: true,
-    description:
-      "Professional financial models, DCF analysis, and interactive Excel dashboards for startups and SMEs.",
-  },
-  {
-    id: "10",
-    category: "support",
-    title: "Customer Support Automation Setup",
-    provider: "Rahim Uddin",
-    initials: "RU",
-    avatarColor: "#ca8a04",
-    rating: 4.6,
-    reviews: 52,
-    rewardPts: 45,
-    deliveryDays: 2,
-    tags: ["Intercom", "Zendesk", "Chatbots"],
-    badge: null,
-    verified: false,
-    description:
-      "Set up helpdesk workflows, chatbots, and automated responses to streamline your support team.",
-  },
-  {
-    id: "11",
-    category: "writing",
-    title: "Resume & LinkedIn Profile Makeover",
-    provider: "Ayesha Siddiqua",
-    initials: "AS",
-    avatarColor: "#0891b2",
-    rating: 4.93,
-    reviews: 291,
-    rewardPts: 35,
-    deliveryDays: 1,
-    tags: ["Resume", "LinkedIn", "Career Coaching"],
-    badge: "Top Rated",
-    verified: true,
-    description:
-      "ATS-friendly resume writing and LinkedIn optimization to help you land more interviews.",
-  },
-  {
-    id: "12",
-    category: "ai",
-    title: "ChatGPT / OpenAI API Integration",
-    provider: "Zubair Hossain",
-    initials: "ZH",
-    avatarColor: "#be185d",
-    rating: 4.78,
-    reviews: 89,
-    rewardPts: 100,
-    deliveryDays: 3,
-    tags: ["OpenAI", "LangChain", "API"],
-    badge: "Rising Talent",
-    verified: true,
-    description:
-      "Integrate ChatGPT or custom LLM workflows into your app using the OpenAI API and LangChain.",
-  },
-];
+// Map API category to component category key
+const mapCategory = (apiCategory) => {
+  const categoryMap = {
+    "Development & IT": "dev",
+    Design: "design",
+    "Design & Creative": "design",
+    Writing: "writing",
+    "Writing & Translation": "writing",
+    Marketing: "marketing",
+    "Sales & Marketing": "marketing",
+    Finance: "finance",
+    "Finance & Accounting": "finance",
+    Support: "support",
+    "Admin & Customer Support": "support",
+    "Engineering & Architecture": "engineering",
+    Mobile: "mobile",
+    "AI / ML": "ai",
+    "AI & Machine Learning": "ai",
+  };
+  return categoryMap[apiCategory] || "all";
+};
+
+// Generate consistent avatar color from name
+const generateAvatarColor = (name) => {
+  const colors = [
+    "#6366f1",
+    "#8b5cf6",
+    "#ec4899",
+    "#f43f5e",
+    "#f97316",
+    "#eab308",
+    "#22c55e",
+    "#14b8a6",
+  ];
+  const hash = name
+    .split("")
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return colors[hash % colors.length];
+};
 
 /* ─── Component ────────────────────────────────────── */
 const SkillMarketplace = () => {
-  const [activeCategory, setActiveCategory] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get("search") || "";
+  const initialCategory =
+    categoryQueryMap[searchParams.get("category")?.toLowerCase()] || "all";
+
+  const [skills, setSkills] = useState([]);
+  const [activeCategory, setActiveCategory] = useState(initialCategory);
+
+  useEffect(() => {
+    fetch("http://localhost:3000/skills")
+      .then((response) => response.json())
+      .then((data) => {
+        // Transform API data to match component expected format
+        const transformedSkills = data.map((skill) => {
+          const starterPackage =
+            skill.packages?.find((p) => p.name === "Starter") ||
+            skill.packages?.[0];
+          const sellerName = skill.seller?.name || "Unknown";
+          const initials = sellerName
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .slice(0, 2)
+            .toUpperCase();
+
+          return {
+            id: skill._id,
+            title: skill.title,
+            category: mapCategory(skill.category),
+            description: skill.description,
+            tags: skill.tags || [],
+            provider: sellerName,
+            verified: skill.status === "active",
+            rating: skill.rating || 4.5,
+            reviews: skill.reviews || 0,
+            rewardPts: starterPackage?.price || 0,
+            deliveryDays: starterPackage?.deliveryDays || 7,
+            avatarColor: generateAvatarColor(sellerName),
+            initials: initials,
+            badge: null,
+          };
+        });
+        setSkills(transformedSkills);
+      })
+      .catch((error) => console.error("Failed to fetch skills:", error));
+  }, []);
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [sortBy, setSortBy] = useState("popular");
   const [viewMode, setViewMode] = useState("grid"); // grid | list
   const [rewardRange, setRewardRange] = useState([0, 250]);
@@ -278,14 +166,14 @@ const SkillMarketplace = () => {
         (s) =>
           s.title.toLowerCase().includes(q) ||
           s.provider.toLowerCase().includes(q) ||
-          s.tags.some((t) => t.toLowerCase().includes(q))
+          s.tags.some((t) => t.toLowerCase().includes(q)),
       );
     }
     if (verifiedOnly) {
       list = list.filter((s) => s.verified);
     }
     list = list.filter(
-      (s) => s.rewardPts >= rewardRange[0] && s.rewardPts <= rewardRange[1]
+      (s) => s.rewardPts >= rewardRange[0] && s.rewardPts <= rewardRange[1],
     );
 
     switch (sortBy) {
@@ -305,7 +193,7 @@ const SkillMarketplace = () => {
         list.sort((a, b) => b.reviews - a.reviews);
     }
     return list;
-  }, [activeCategory, searchQuery, sortBy, rewardRange, verifiedOnly]);
+  }, [skills, activeCategory, searchQuery, sortBy, rewardRange, verifiedOnly]);
 
   return (
     <div className="marketplace-page">
@@ -316,7 +204,11 @@ const SkillMarketplace = () => {
             <span className="mp-hero-eyebrow">
               <IoStorefrontOutline /> Skill Marketplace
             </span>
-            <h1>Find the Perfect Skill,<br />Pay with Rewards</h1>
+            <h1>
+              Find the Perfect Skill,
+              <br />
+              Pay with Rewards
+            </h1>
             <p>
               Browse hundreds of skills offered by talented community members.
               No money — just digital reward points.
@@ -353,7 +245,10 @@ const SkillMarketplace = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           {searchQuery && (
-            <button className="mp-search-clear" onClick={() => setSearchQuery("")}>
+            <button
+              className="mp-search-clear"
+              onClick={() => setSearchQuery("")}
+            >
               <IoClose />
             </button>
           )}
@@ -364,10 +259,15 @@ const SkillMarketplace = () => {
       {/* ══════ MAIN CONTENT ══════ */}
       <div className="mp-body">
         {/* ── Sidebar ── */}
-        <aside className={`mp-sidebar ${showFilters ? "mp-sidebar--open" : ""}`}>
+        <aside
+          className={`mp-sidebar ${showFilters ? "mp-sidebar--open" : ""}`}
+        >
           <div className="mp-sidebar-header">
             <span>Filters</span>
-            <button className="mp-sidebar-close" onClick={() => setShowFilters(false)}>
+            <button
+              className="mp-sidebar-close"
+              onClick={() => setShowFilters(false)}
+            >
               <IoClose />
             </button>
           </div>
@@ -516,9 +416,15 @@ const SkillMarketplace = () => {
               </button>
             </div>
           ) : (
-            <div className={`mp-cards ${viewMode === "list" ? "mp-cards--list" : ""}`}>
+            <div
+              className={`mp-cards ${viewMode === "list" ? "mp-cards--list" : ""}`}
+            >
               {filtered.map((skill) => (
-                <SkillCard key={skill.id} skill={skill} listMode={viewMode === "list"} />
+                <SkillCard
+                  key={skill.id}
+                  skill={skill}
+                  listMode={viewMode === "list"}
+                />
               ))}
             </div>
           )}
@@ -536,12 +442,13 @@ const SkillCard = ({ skill, listMode }) => (
   >
     {skill.badge && (
       <span
-        className={`mp-card-badge ${skill.badge === "Top Rated"
+        className={`mp-card-badge ${
+          skill.badge === "Top Rated"
             ? "mp-card-badge--gold"
             : skill.badge === "Expert"
               ? "mp-card-badge--blue"
               : "mp-card-badge--green"
-          }`}
+        }`}
       >
         {skill.badge === "Top Rated" && <IoTrophyOutline />}
         {skill.badge}
@@ -549,18 +456,13 @@ const SkillCard = ({ skill, listMode }) => (
     )}
 
     <div className="mp-card-header">
-      <div
-        className="mp-card-avatar"
-        style={{ background: skill.avatarColor }}
-      >
+      <div className="mp-card-avatar" style={{ background: skill.avatarColor }}>
         {skill.initials}
       </div>
       <div className="mp-card-provider-info">
         <span className="mp-card-provider">
           {skill.provider}
-          {skill.verified && (
-            <IoCheckmarkCircle className="mp-card-verified" />
-          )}
+          {skill.verified && <IoCheckmarkCircle className="mp-card-verified" />}
         </span>
         <span className="mp-card-rating">
           <IoStarSharp className="mp-card-star" />

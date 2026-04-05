@@ -259,6 +259,32 @@
   flex-shrink: 0;
 }
 
+/* ── Reward Badge ── */
+.nav-reward-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: linear-gradient(135deg, #f0faf0, #e8f5e8);
+  border-radius: 50px;
+  text-decoration: none;
+  color: #14a800;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: 1px solid #d4edd4;
+}
+
+.nav-reward-badge:hover {
+  background: linear-gradient(135deg, #e0f5e0, #d4edd4);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(20, 168, 0, 0.15);
+}
+
+.nav-reward-points {
+  white-space: nowrap;
+}
+
 /* ── Profile Button ── */
 .nav-profile {
   position: relative;
@@ -364,7 +390,11 @@
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 60%
+  );
   opacity: 0;
   transition: opacity 0.3s;
   pointer-events: none;

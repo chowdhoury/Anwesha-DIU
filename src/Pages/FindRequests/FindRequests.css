@@ -3,6 +3,7 @@
 .fr-page {
   min-height: 100vh;
   background: #f7faf7;
+  overflow-x: hidden;
 }
 
 /* ══════ HERO ══════ */
@@ -257,6 +258,8 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
+  overflow: hidden;
+  padding-top: 4px;
 }
 
 .fr-cards--list {
@@ -274,6 +277,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .fr-card:hover {
@@ -402,6 +407,8 @@
   color: #001e00;
   line-height: 1.35;
   padding-right: 60px; /* room for urgency badge */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .fr-card--list .fr-card-title {
@@ -413,6 +420,12 @@
   color: #666;
   line-height: 1.6;
   flex: 1;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 /* Tags */

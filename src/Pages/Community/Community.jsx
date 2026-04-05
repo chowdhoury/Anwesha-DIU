@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link } from "react-router";
 import {
   IoPeopleOutline,
@@ -12,103 +12,21 @@ import {
   IoRocketOutline,
   IoBookmarkOutline,
   IoThumbsUpOutline,
+  IoCloseOutline,
+  IoImageOutline,
 } from "react-icons/io5";
+import { AuthContext } from "../../Authentication/AuthContext";
 import "./Community.css";
 
 /* ─── Static Data ──────────── */
-const TOPICS = ["All", "Announcements", "Tips & Tricks", "Success Stories", "Help Needed", "Introductions"];
-
-const POSTS = [
-  {
-    id: 1,
-    topic: "Success Stories",
-    author: "Tanvir Ahmed",
-    initials: "TA",
-    avatarColor: "#14a800",
-    badge: "Champion",
-    time: "2h ago",
-    title: "How I went from Newcomer to Expert in 3 months 🚀",
-    body: "When I joined Anwesha, I had no idea how valuable my full-stack dev skills were to other community members. In 3 months, I've completed 14 tasks, earned 840+ points, and made real friends along the way. Here's my journey...",
-    likes: 142,
-    comments: 38,
-    tags: ["journey", "dev", "motivation"],
-    pinned: true,
-  },
-  {
-    id: 2,
-    topic: "Tips & Tricks",
-    author: "Nusrat Jahan",
-    initials: "NJ",
-    avatarColor: "#db2777",
-    badge: "Champion",
-    time: "5h ago",
-    title: "5 tips to write a winning skill listing that gets booked fast",
-    body: "After posting 12 skills on the marketplace, I've figured out what makes buyers click 'Book Now'. Your title, your first sentence, and your price all matter more than you think. Let me break it down...",
-    likes: 89,
-    comments: 21,
-    tags: ["listing", "tips", "marketplace"],
-    pinned: false,
-  },
-  {
-    id: 3,
-    topic: "Announcements",
-    author: "Anwesha Team",
-    initials: "AT",
-    avatarColor: "#0891b2",
-    badge: "Team",
-    time: "1d ago",
-    title: "🎉 We just hit 1,200 active members! Here's what's next...",
-    body: "This community milestone happened faster than we expected. Thank you all for building something truly special together. As a celebration, we're launching a 2× points week starting Monday — every task you complete earns double!",
-    likes: 231,
-    comments: 67,
-    tags: ["milestone", "news", "2x-points"],
-    pinned: false,
-  },
-  {
-    id: 4,
-    topic: "Help Needed",
-    author: "Farhan Hossain",
-    initials: "FH",
-    avatarColor: "#0369a1",
-    badge: "Expert",
-    time: "3h ago",
-    title: "Looking for someone who knows Figma Auto Layout deeply",
-    body: "I'm working on a complex design system and keep running into issues with nested auto layout frames. If anyone has deep Figma expertise, I'd love to exchange a skill — I can offer Python/data analysis in return.",
-    likes: 14,
-    comments: 9,
-    tags: ["figma", "design", "skill-swap"],
-    pinned: false,
-  },
-  {
-    id: 5,
-    topic: "Introductions",
-    author: "Ayesha Siddiqua",
-    initials: "AS",
-    avatarColor: "#d97706",
-    badge: "Helper",
-    time: "6h ago",
-    title: "New here! Frontend dev & aspiring UX designer 👋",
-    body: "Hi everyone! I'm Ayesha, a frontend dev from Dhaka. I've been lurking for a while and finally decided to join. I specialize in React and Tailwind but I'm learning UX. Looking forward to helping and learning from this amazing community!",
-    likes: 56,
-    comments: 24,
-    tags: ["intro", "frontend", "Dhaka"],
-    pinned: false,
-  },
-  {
-    id: 6,
-    topic: "Tips & Tricks",
-    author: "Maruf Hasan",
-    initials: "MH",
-    avatarColor: "#059669",
-    badge: "Helper",
-    time: "2d ago",
-    title: "How to give excellent feedback that providers actually love",
-    body: "Getting a 5-star service is only half the value. The other half is giving a thoughtful review that helps the community. A great review mentions specifics, notes what exceeded expectations, and takes 3 minutes to write.",
-    likes: 73,
-    comments: 15,
-    tags: ["feedback", "ratings", "community"],
-    pinned: false,
-  },
+const TOPICS = [
+  "All",
+  "Announcements",
+  "Tips & Tricks",
+  "Success Stories",
+  "Help Needed",
+  "Introductions",
+  "Others",
 ];
 
 const BADGE_COLORS = {
@@ -118,20 +36,161 @@ const BADGE_COLORS = {
   Team: "#14a800",
 };
 
+// Helper function to format time ago
+const getTimeAgo = (dateString) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.floor((now - date) / 1000);
+
+  if (seconds < 60) return "Just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 4) return `${weeks}w ago`;
+  return date.toLocaleDateString();
+};
+
 /* ─── Component ─────────────── */
 const Community = () => {
+  const { user } = useContext(AuthContext);
   const [activeTopic, setActiveTopic] = useState("All");
   const [liked, setLiked] = useState([]);
   const [bookmarked, setBookmarked] = useState([]);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [newPost, setNewPost] = useState({
+    title: "",
+    body: "",
+    topic: "",
+    tags: "",
+  });
+
+  const fetchPosts = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("http://localhost:3000/community");
+      if (!response.ok) throw new Error("Failed to fetch posts");
+      const data = await response.json();
+      setPosts(data);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch posts from API
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
   const toggleLike = (id) =>
-    setLiked((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
+    setLiked((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
+    );
 
   const toggleBookmark = (id) =>
-    setBookmarked((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
+    setBookmarked((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
+    );
 
-  const filtered = POSTS.filter(
-    (p) => activeTopic === "All" || p.topic === activeTopic
+  const handlePostSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    // Get author info from authenticated user
+    const authorName = user?.displayName || "Anonymous User";
+    const initials = authorName
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+
+    // Parse tags from comma-separated string
+    const tagsArray = newPost.tags
+      .split(",")
+      .map((tag) => tag.trim().toLowerCase().replace(/^#/, ""))
+      .filter((tag) => tag.length > 0);
+
+    // Generate random avatar color if no photo
+    const avatarColors = [
+      "#14a800",
+      "#db2777",
+      "#0891b2",
+      "#7c3aed",
+      "#d97706",
+      "#0369a1",
+      "#059669",
+    ];
+    const randomColor =
+      avatarColors[Math.floor(Math.random() * avatarColors.length)];
+
+    const postData = {
+      id: `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      topic: newPost.topic,
+      title: newPost.title,
+      body: newPost.body,
+      tags: tagsArray,
+      author: {
+        name: authorName,
+        initials: initials,
+        avatarColor: randomColor,
+        photoURL: user?.photoURL || null,
+        badge: "Helper",
+        email: user?.email || null,
+        userId: user?.uid || `guest_${Math.random().toString(36).substr(2, 9)}`,
+      },
+      metadata: {
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        status: "published",
+        pinned: false,
+      },
+      engagement: {
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        views: 0,
+      },
+    };
+
+    try {
+      const response = await fetch("http://localhost:3000/community", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(postData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create post");
+      }
+
+      const result = await response.json();
+      console.log("Post created successfully:", result);
+
+      // Re-fetch to ensure we render the exact backend response shape.
+      await fetchPosts();
+      setNewPost({ title: "", body: "", topic: "", tags: "" });
+      setIsPostModalOpen(false);
+    } catch (error) {
+      console.error("Error creating post:", error);
+      alert("Failed to create post. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const filtered = posts.filter(
+    (p) => activeTopic === "All" || p.topic === activeTopic,
   );
 
   return (
@@ -147,7 +206,8 @@ const Community = () => {
             <IoPeopleOutline /> The Anwesha Community
           </span>
           <h1>
-            Learn Together.<br />
+            Learn Together.
+            <br />
             <span className="cm-hero-gradient">Grow Together.</span>
           </h1>
           <p>
@@ -155,9 +215,12 @@ const Community = () => {
             advice, and celebrate milestones together.
           </p>
           <div className="cm-hero-actions">
-            <Link to="/post-skill" className="cm-cta-primary">
+            <button
+              onClick={() => setIsPostModalOpen(true)}
+              className="cm-cta-primary"
+            >
               <IoCreateOutline /> Start a Post
-            </Link>
+            </button>
             <Link to="/skill-marketplace" className="cm-cta-secondary">
               Explore Skills <IoArrowForward />
             </Link>
@@ -201,74 +264,118 @@ const Community = () => {
 
             {/* Posts */}
             <div className="cm-posts">
-              {filtered.map((post) => (
-                <div key={post.id} className={`cm-post-card ${post.pinned ? "cm-post-card--pinned" : ""}`}>
-                  {post.pinned && (
-                    <div className="cm-pin-badge">📌 Pinned Post</div>
-                  )}
-
-                  {/* Author */}
-                  <div className="cm-post-author">
-                    <div
-                      className="cm-post-avatar"
-                      style={{ background: post.avatarColor }}
-                    >
-                      {post.initials}
-                    </div>
-                    <div>
-                      <div className="cm-post-author-meta">
-                        <span className="cm-post-author-name">{post.author}</span>
-                        <span
-                          className="cm-post-badge"
-                          style={{ background: BADGE_COLORS[post.badge] + "20", color: BADGE_COLORS[post.badge] }}
-                        >
-                          {post.badge}
-                        </span>
-                      </div>
-                      <div className="cm-post-meta-line">
-                        <span className="cm-post-time">{post.time}</span>
-                        <span className="cm-post-topic-tag">{post.topic}</span>
-                      </div>
-                    </div>
-                    <button
-                      className={`cm-bookmark-btn ${bookmarked.includes(post.id) ? "cm-bookmark-btn--saved" : ""}`}
-                      onClick={() => toggleBookmark(post.id)}
-                    >
-                      <IoBookmarkOutline />
-                    </button>
-                  </div>
-
-                  {/* Content */}
-                  <h3 className="cm-post-title">{post.title}</h3>
-                  <p className="cm-post-body">{post.body}</p>
-
-                  {/* Tags */}
-                  <div className="cm-post-tags">
-                    {post.tags.map((tag) => (
-                      <span key={tag} className="cm-post-tag">#{tag}</span>
-                    ))}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="cm-post-actions">
-                    <button
-                      className={`cm-action-btn ${liked.includes(post.id) ? "cm-action-btn--liked" : ""}`}
-                      onClick={() => toggleLike(post.id)}
-                    >
-                      <IoThumbsUpOutline />
-                      {post.likes + (liked.includes(post.id) ? 1 : 0)}
-                    </button>
-                    <button className="cm-action-btn">
-                      <IoChatbubbleOutline />
-                      {post.comments}
-                    </button>
-                    <button className="cm-action-btn">
-                      <IoShareSocialOutline />
-                      Share
-                    </button>
-                  </div>
+              {isLoading ? (
+                <div className="cm-loading">Loading posts...</div>
+              ) : filtered.length === 0 ? (
+                <div className="cm-empty">
+                  No posts yet. Be the first to share!
                 </div>
-              ))}
+              ) : (
+                filtered.map((post) => {
+                  // Handle both API format (nested author) and static format (flat)
+                  const authorName = post.author?.name || post.author;
+                  const initials = post.author?.initials || post.initials;
+                  const avatarColor =
+                    post.author?.avatarColor || post.avatarColor;
+                  const badge = post.author?.badge || post.badge;
+                  const photoURL = post.author?.photoURL;
+                  const isPinned = post.metadata?.pinned || post.pinned;
+                  const likes = post.engagement?.likes ?? post.likes ?? 0;
+                  const comments =
+                    post.engagement?.comments ?? post.comments ?? 0;
+                  const createdAt = post.metadata?.createdAt;
+                  const timeAgo = createdAt ? getTimeAgo(createdAt) : post.time;
+
+                  return (
+                    <div
+                      key={post.id}
+                      className={`cm-post-card ${isPinned ? "cm-post-card--pinned" : ""}`}
+                    >
+                      {isPinned && (
+                        <div className="cm-pin-badge">📌 Pinned Post</div>
+                      )}
+
+                      {/* Author */}
+                      <div className="cm-post-author">
+                        {photoURL ? (
+                          <img
+                            src={photoURL}
+                            alt={authorName}
+                            className="cm-post-avatar-img"
+                          />
+                        ) : (
+                          <div
+                            className="cm-post-avatar"
+                            style={{ background: avatarColor }}
+                          >
+                            {initials}
+                          </div>
+                        )}
+                        <div>
+                          <div className="cm-post-author-meta">
+                            <span className="cm-post-author-name">
+                              {authorName}
+                            </span>
+                            <span
+                              className="cm-post-badge"
+                              style={{
+                                background: BADGE_COLORS[badge] + "20",
+                                color: BADGE_COLORS[badge],
+                              }}
+                            >
+                              {badge}
+                            </span>
+                          </div>
+                          <div className="cm-post-meta-line">
+                            <span className="cm-post-time">{timeAgo}</span>
+                            <span className="cm-post-topic-tag">
+                              {post.topic}
+                            </span>
+                          </div>
+                        </div>
+                        {/* <button
+                          className={`cm-bookmark-btn ${bookmarked.includes(post.id) ? "cm-bookmark-btn--saved" : ""}`}
+                          onClick={() => toggleBookmark(post.id)}
+                        >
+                          <IoBookmarkOutline />
+                        </button> */}
+                      </div>
+
+                      {/* Content */}
+                      <h3 className="cm-post-title">{post.title}</h3>
+                      <p className="cm-post-body">{post.body}</p>
+
+                      {/* Tags */}
+                      <div className="cm-post-tags">
+                        {post.tags?.map((tag) => (
+                          <span key={tag} className="cm-post-tag">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="cm-post-actions">
+                        <button
+                          className={`cm-action-btn ${liked.includes(post.id) ? "cm-action-btn--liked" : ""}`}
+                          onClick={() => toggleLike(post.id)}
+                        >
+                          <IoThumbsUpOutline />
+                          {likes + (liked.includes(post.id) ? 1 : 0)}
+                        </button>
+                        <button className="cm-action-btn">
+                          <IoChatbubbleOutline />
+                          {comments}
+                        </button>
+                        <button className="cm-action-btn">
+                          <IoShareSocialOutline />
+                          Share
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
 
@@ -278,8 +385,17 @@ const Community = () => {
             <div className="cm-sidebar-card">
               <h4 className="cm-sidebar-title">🔥 Trending Topics</h4>
               <div className="cm-trending-list">
-                {["#react", "#figma", "#skill-swap", "#motivation", "#python", "#2x-points"].map((t) => (
-                  <button key={t} className="cm-trending-tag">{t}</button>
+                {[
+                  "#react",
+                  "#figma",
+                  "#skill-swap",
+                  "#motivation",
+                  "#python",
+                  "#2x-points",
+                ].map((t) => (
+                  <button key={t} className="cm-trending-tag">
+                    {t}
+                  </button>
                 ))}
               </div>
             </div>
@@ -291,15 +407,37 @@ const Community = () => {
               </h4>
               <div className="cm-top-list">
                 {[
-                  { name: "Tanvir Ahmed", pts: 2840, initials: "TA", color: "#14a800" },
-                  { name: "Nusrat Jahan", pts: 2310, initials: "NJ", color: "#db2777" },
-                  { name: "Rafiqul Islam", pts: 1920, initials: "RI", color: "#7c3aed" },
+                  {
+                    name: "Tanvir Ahmed",
+                    pts: 2840,
+                    initials: "TA",
+                    color: "#14a800",
+                  },
+                  {
+                    name: "Nusrat Jahan",
+                    pts: 2310,
+                    initials: "NJ",
+                    color: "#db2777",
+                  },
+                  {
+                    name: "Rafiqul Islam",
+                    pts: 1920,
+                    initials: "RI",
+                    color: "#7c3aed",
+                  },
                 ].map((u, i) => (
                   <div key={u.name} className="cm-top-row">
                     <span className="cm-top-rank">{["🥇", "🥈", "🥉"][i]}</span>
-                    <div className="cm-top-avatar" style={{ background: u.color }}>{u.initials}</div>
+                    <div
+                      className="cm-top-avatar"
+                      style={{ background: u.color }}
+                    >
+                      {u.initials}
+                    </div>
                     <span className="cm-top-name">{u.name}</span>
-                    <span className="cm-top-pts"><IoFlashOutline /> {u.pts.toLocaleString()}</span>
+                    <span className="cm-top-pts">
+                      <IoFlashOutline /> {u.pts.toLocaleString()}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -313,13 +451,114 @@ const Community = () => {
               <IoRocketOutline className="cm-sidebar-cta-icon" />
               <h4>Earn as you help</h4>
               <p>Every completed task earns you reward points. Start today!</p>
-              <Link to="/skill-marketplace" className="cm-cta-primary cm-cta-primary--full">
+              <Link
+                to="/skill-marketplace"
+                className="cm-cta-primary cm-cta-primary--full"
+              >
                 Browse Marketplace
               </Link>
             </div>
           </aside>
         </div>
       </section>
+
+      {/* ══════ POST MODAL ══════ */}
+      {isPostModalOpen && (
+        <div
+          className="cm-modal-overlay"
+          onClick={() => setIsPostModalOpen(false)}
+        >
+          <div className="cm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="cm-modal-header">
+              <h2>Create a Post</h2>
+              <button
+                className="cm-modal-close"
+                onClick={() => setIsPostModalOpen(false)}
+              >
+                <IoCloseOutline />
+              </button>
+            </div>
+            <form onSubmit={handlePostSubmit} className="cm-modal-form">
+              <div className="cm-form-group">
+                <label htmlFor="post-topic">Topic</label>
+                <select
+                  id="post-topic"
+                  value={newPost.topic}
+                  onChange={(e) =>
+                    setNewPost({ ...newPost, topic: e.target.value })
+                  }
+                  required
+                >
+                  <option value="" disabled>
+                    Select a category
+                  </option>
+                  {TOPICS.filter((t) => t !== "All").map((topic) => (
+                    <option key={topic} value={topic}>
+                      {topic}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="cm-form-group">
+                <label htmlFor="post-title">Title</label>
+                <input
+                  id="post-title"
+                  type="text"
+                  placeholder="Give your post a catchy title..."
+                  value={newPost.title}
+                  onChange={(e) =>
+                    setNewPost({ ...newPost, title: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="cm-form-group">
+                <label htmlFor="post-body">Content</label>
+                <textarea
+                  id="post-body"
+                  placeholder="Share your thoughts, experiences, or questions..."
+                  rows={5}
+                  value={newPost.body}
+                  onChange={(e) =>
+                    setNewPost({ ...newPost, body: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="cm-form-group">
+                <label htmlFor="post-tags">Tags (comma separated)</label>
+                <input
+                  id="post-tags"
+                  type="text"
+                  placeholder="e.g., react, tips, motivation"
+                  value={newPost.tags}
+                  onChange={(e) =>
+                    setNewPost({ ...newPost, tags: e.target.value })
+                  }
+                />
+              </div>
+              <div className="cm-modal-actions">
+                <button
+                  type="button"
+                  className="cm-cta-secondary"
+                  onClick={() => setIsPostModalOpen(false)}
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="cm-cta-primary"
+                  disabled={isSubmitting}
+                >
+                  <IoCreateOutline />{" "}
+                  {isSubmitting ? "Publishing..." : "Publish Post"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

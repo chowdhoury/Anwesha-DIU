@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import {
   IoSearch,
   IoArrowForward,
@@ -167,6 +167,8 @@ const popularSkills = [
 /* ─── Component ─────────────────────────────────────── */
 const HomePage = () => {
   const [headlineIndex, setHeadlineIndex] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -174,6 +176,19 @@ const HomePage = () => {
     }, 3000);
     return () => clearInterval(id);
   }, []);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(
+        `/skill-marketplace?search=${encodeURIComponent(searchQuery.trim())}`,
+      );
+    }
+  };
+
+  const handlePopularClick = (skill) => {
+    navigate(`/skill-marketplace?search=${encodeURIComponent(skill)}`);
+  };
 
   const { highlight, text } = heroHeadlines[headlineIndex];
 
@@ -197,24 +212,32 @@ const HomePage = () => {
             </p>
 
             {/* Search Bar */}
-            <div className="hero-search">
+            <form className="hero-search" onSubmit={handleSearch}>
               <IoSearch className="search-icon" />
               <input
                 type="text"
                 placeholder='Try "React developer" or "Logo design"'
                 className="search-input"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <button className="search-btn">Search</button>
-            </div>
+              <button type="submit" className="search-btn">
+                Search
+              </button>
+            </form>
 
             {/* Popular Skills */}
             <div className="hero-popular">
               <span className="popular-label">Popular:</span>
               <div className="popular-tags">
                 {popularSkills.slice(0, 5).map((skill) => (
-                  <Link to="/skill-marketplace" className="popular-tag" key={skill}>
+                  <button
+                    onClick={() => handlePopularClick(skill)}
+                    className="popular-tag"
+                    key={skill}
+                  >
                     {skill}
-                  </Link>
+                  </button>
                 ))}
               </div>
             </div>
@@ -291,7 +314,11 @@ const HomePage = () => {
 
           <div className="category-grid">
             {categories.map((cat) => (
-              <Link to="/skill-marketplace" className="category-card" key={cat.title}>
+              <Link
+                to={`/skill-marketplace?category=${encodeURIComponent(cat.title)}`}
+                className="category-card"
+                key={cat.title}
+              >
                 <div className="category-icon">{cat.icon}</div>
                 <h3 className="category-title">{cat.title}</h3>
                 <div className="category-meta">
@@ -367,7 +394,11 @@ const HomePage = () => {
           <h2 className="section-title">Browse top skills</h2>
           <div className="skills-grid">
             {popularSkills.map((skill) => (
-              <Link to="/skill-marketplace" className="skill-chip" key={skill}>
+              <Link
+                to={`/skill-marketplace?search=${encodeURIComponent(skill)}`}
+                className="skill-chip"
+                key={skill}
+              >
                 {skill}
                 <IoArrowForward className="chip-arrow" />
               </Link>

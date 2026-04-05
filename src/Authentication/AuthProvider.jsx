@@ -17,6 +17,19 @@ const googleProvider = new GoogleAuthProvider();
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [dbUser, setDbUser] = useState(null);
+
+  const fetchDbUser = async (email) => {
+    try {
+      const res = await fetch(`http://localhost:3000/users/${email}`);
+      if (res.ok) {
+        const data = await res.json();
+        setDbUser(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch db user:", err);
+    }
+  };
 
   const createUser = (email, password) => {
     setLoading(true);
@@ -54,6 +67,11 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser?.email) {
+        await fetchDbUser(currentUser.email);
+      } else {
+        setDbUser(null);
+      }
       setLoading(false);
     });
     return () => {
@@ -65,6 +83,8 @@ const AuthProvider = ({ children }) => {
     setUser,
     loading,
     setLoading,
+    dbUser,
+    fetchDbUser,
     createUser,
     signIn,
     signInWithGoogle,

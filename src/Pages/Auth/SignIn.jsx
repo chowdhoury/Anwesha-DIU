@@ -46,6 +46,26 @@ const SignIn = () => {
     return "Authentication failed. Please try again.";
   };
 
+  const createUserInDb = async (authUser, fallbackName = "") => {
+    const response = await fetch("http://localhost:3000/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: authUser?.uid || "",
+        email: authUser?.email || "",
+        name: authUser?.displayName || fallbackName,
+        profilePicture: authUser?.photoURL || "",
+        rewardPoints: 100,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to save user in database");
+    }
+  };
+
   const onSubmit = async (data) => {
     try {
       await signIn(data.email, data.password);
@@ -59,11 +79,13 @@ const SignIn = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signInWithGoogle();
+      const result = await signInWithGoogle();
+      await createUserInDb(result?.user);
       toast.success("Google sign-in successful!");
       navigate("/");
     } catch (error) {
-      toast.error(getFirebaseAuthErrorMessage(error));
+      // Optionally handle error, e.g. show error message
+      toast.error("Google sign-in failed. Please try again.");
       console.error("Firebase Google signIn error:", error);
     }
   };

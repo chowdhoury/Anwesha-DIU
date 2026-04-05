@@ -15,11 +15,8 @@ import {
   IoRocketOutline,
   IoPeopleOutline,
   IoSettingsOutline,
-  IoShieldCheckmarkOutline,
   IoCodeSlashOutline,
   IoColorPaletteOutline,
-  IoBulbOutline,
-  IoBookOutline,
   IoCloseOutline,
   IoImageOutline,
   IoPersonOutline,
@@ -28,17 +25,13 @@ import {
   IoLogoLinkedin,
   IoLogoTwitter,
 } from "react-icons/io5";
-import {
-  FaGithub,
-  FaLinkedinIn,
-  FaTwitter,
-  FaHandshake,
-} from "react-icons/fa";
+import { FaGithub, FaLinkedinIn, FaTwitter, FaHandshake } from "react-icons/fa";
 import toast from "react-hot-toast";
 import "./MyProfile.css";
 
 const MyProfile = () => {
-  const { user, updateUserProfile, setUser } = useContext(AuthContext);
+  const { user, updateUserProfile, setUser, dbUser, fetchDbUser } =
+    useContext(AuthContext);
   const [activeTab, setActiveTab] = useState("overview");
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -54,29 +47,45 @@ const MyProfile = () => {
     twitter: "",
   });
   const [skillInput, setSkillInput] = useState("");
+  const [stats, setStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  // Fetch user stats from backend
+  useEffect(() => {
+    if (user?.email) {
+      setStatsLoading(true);
+      fetch(`http://localhost:3000/users/${user.email}/stats`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => setStats(data))
+        .catch((err) => console.error("Failed to fetch stats:", err))
+        .finally(() => setStatsLoading(false));
+    }
+  }, [user?.email]);
 
   // Sync form with user data when modal opens
   useEffect(() => {
     if (editModalOpen && user) {
       setEditForm({
-        displayName: user.displayName || "",
-        photoURL: user.photoURL || "",
-        bio: profileData.bio,
-        location: profileData.location,
-        website: profileData.website,
-        skills: [...profileData.skills],
-        github: "",
-        linkedin: "",
-        twitter: "",
+        displayName: user.displayName || dbUser?.name || "",
+        photoURL: user.photoURL || dbUser?.profilePicture || "",
+        bio: dbUser?.bio || "",
+        location: dbUser?.location || "",
+        website: dbUser?.website || "",
+        skills: dbUser?.skills ? [...dbUser.skills] : [],
+        github: dbUser?.github || "",
+        linkedin: dbUser?.linkedin || "",
+        twitter: dbUser?.twitter || "",
       });
       setSkillInput("");
     }
-  }, [editModalOpen, user]);
+  }, [editModalOpen, user, dbUser]);
 
   // Lock body scroll when modal is open
   useEffect(() => {
     document.body.style.overflow = editModalOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [editModalOpen]);
 
   const handleEditChange = (e) => {
@@ -113,9 +122,38 @@ const MyProfile = () => {
     }
     setSaving(true);
     try {
-      await updateUserProfile(editForm.displayName.trim(), editForm.photoURL.trim() || null);
-      // Force user state refresh
-      setUser({ ...user, displayName: editForm.displayName.trim(), photoURL: editForm.photoURL.trim() || null });
+      // Update Firebase auth profile
+      await updateUserProfile(
+        editForm.displayName.trim(),
+        editForm.photoURL.trim() || null,
+      );
+      setUser({
+        ...user,
+        displayName: editForm.displayName.trim(),
+        photoURL: editForm.photoURL.trim() || null,
+      });
+
+      // Persist extended profile fields to backend DB
+      const res = await fetch(`http://localhost:3000/users/${user.email}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editForm.displayName.trim(),
+          profilePicture: editForm.photoURL.trim() || "",
+          bio: editForm.bio.trim(),
+          location: editForm.location.trim(),
+          website: editForm.website.trim(),
+          skills: editForm.skills,
+          github: editForm.github.trim(),
+          linkedin: editForm.linkedin.trim(),
+          twitter: editForm.twitter.trim(),
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to save profile to database");
+
+      // Refresh dbUser so the UI updates immediately
+      await fetchDbUser(user.email);
+
       toast.success("Profile updated successfully!");
       setEditModalOpen(false);
     } catch (err) {
@@ -136,83 +174,59 @@ const MyProfile = () => {
       .slice(0, 2);
   };
 
-  // Placeholder data (would come from DB in production)
-  const profileData = {
-    bio: "Passionate developer who loves building things and helping others. Always curious, always learning.",
-    location: "Dhaka, Bangladesh",
-    website: "https://example.com",
-    memberSince: "February 2026",
-    skills: [
-      "JavaScript",
-      "React",
-      "Node.js",
-      "Python",
-      "UI/UX Design",
-      "Firebase",
-      "MongoDB",
-      "Git",
-    ],
-    stats: {
-      rewardPoints: 1250,
-      tasksCompleted: 34,
-      helpGiven: 28,
-      helpReceived: 6,
-      rating: 4.9,
-      reviews: 22,
-    },
-    badges: [
-      {
-        icon: <IoRocketOutline />,
-        label: "Early Adopter",
-        color: "#6366f1",
-      },
-      {
-        icon: <IoFlashOutline />,
-        label: "Quick Responder",
-        color: "#f59e0b",
-      },
-      {
-        icon: <IoCheckmarkCircle />,
-        label: "Verified",
-        color: "#14a800",
-      },
-      {
-        icon: <FaHandshake />,
-        label: "Team Player",
-        color: "#ec4899",
-      },
-    ],
-    recentActivity: [
-      {
-        type: "helped",
-        icon: <IoCodeSlashOutline />,
-        title: "Helped debug a React application",
-        reward: "+50 pts",
-        time: "2 hours ago",
-      },
-      {
-        type: "received",
-        icon: <IoColorPaletteOutline />,
-        title: "Got help with logo redesign",
-        reward: "-30 pts",
-        time: "1 day ago",
-      },
-      {
-        type: "helped",
-        icon: <IoBulbOutline />,
-        title: "Mentored a junior developer",
-        reward: "+75 pts",
-        time: "3 days ago",
-      },
-      {
-        type: "helped",
-        icon: <IoBookOutline />,
-        title: "Wrote a Python tutorial",
-        reward: "+40 pts",
-        time: "5 days ago",
-      },
-    ],
+  // Helper to format ISO timestamps as relative time
+  const timeAgo = (dateStr) => {
+    if (!dateStr) return "";
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days < 30) return `${days}d ago`;
+    return new Date(dateStr).toLocaleDateString();
   };
+
+  // Derive member-since from user creation date
+  const memberSince = user?.metadata?.creationTime
+    ? new Date(user.metadata.creationTime).toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+      })
+    : "";
+
+  const userSkills = dbUser?.skills || [];
+  const rewardPoints = dbUser?.rewardPoints ?? 0;
+  const recentActivity = stats?.recentActivity || [];
+
+  // Compute badges dynamically based on real data
+  const badges = [
+    ...(memberSince
+      ? [
+          {
+            icon: <IoRocketOutline />,
+            label: "Early Adopter",
+            color: "#6366f1",
+          },
+        ]
+      : []),
+    ...(stats?.helpGiven >= 5
+      ? [
+          {
+            icon: <IoFlashOutline />,
+            label: "Quick Responder",
+            color: "#f59e0b",
+          },
+        ]
+      : []),
+    ...(user?.emailVerified
+      ? [{ icon: <IoCheckmarkCircle />, label: "Verified", color: "#14a800" }]
+      : []),
+    ...(stats?.helpGiven >= 3
+      ? [{ icon: <FaHandshake />, label: "Team Player", color: "#ec4899" }]
+      : []),
+  ];
 
   const tabs = [
     { key: "overview", label: "Overview" },
@@ -245,7 +259,11 @@ const MyProfile = () => {
                   {getInitials(user?.displayName)}
                 </div>
               )}
-              <button className="profile-avatar-edit" aria-label="Change photo" onClick={() => setEditModalOpen(true)}>
+              <button
+                className="profile-avatar-edit"
+                aria-label="Change photo"
+                onClick={() => setEditModalOpen(true)}
+              >
                 <IoCamera />
               </button>
               <span className="profile-online-dot" />
@@ -259,22 +277,28 @@ const MyProfile = () => {
                 </span>
               </div>
               <p className="profile-email">{user?.email}</p>
-              <p className="profile-bio">{profileData.bio}</p>
+              {dbUser?.bio && <p className="profile-bio">{dbUser.bio}</p>}
               <div className="profile-meta">
-                <span className="profile-meta-item">
-                  <IoLocationOutline /> {profileData.location}
-                </span>
-                <span className="profile-meta-item">
-                  <IoCalendarOutline /> Joined {profileData.memberSince}
-                </span>
-                <a
-                  href={profileData.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="profile-meta-item profile-meta-link"
-                >
-                  <IoGlobeOutline /> Website
-                </a>
+                {dbUser?.location && (
+                  <span className="profile-meta-item">
+                    <IoLocationOutline /> {dbUser.location}
+                  </span>
+                )}
+                {memberSince && (
+                  <span className="profile-meta-item">
+                    <IoCalendarOutline /> Joined {memberSince}
+                  </span>
+                )}
+                {dbUser?.website && (
+                  <a
+                    href={dbUser.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="profile-meta-item profile-meta-link"
+                  >
+                    <IoGlobeOutline /> Website
+                  </a>
+                )}
               </div>
             </div>
           </div>
@@ -283,7 +307,10 @@ const MyProfile = () => {
             <Link to="/" className="profile-btn profile-btn--outline">
               <IoSettingsOutline /> Settings
             </Link>
-            <button className="profile-btn profile-btn--primary" onClick={() => setEditModalOpen(true)}>
+            <button
+              className="profile-btn profile-btn--primary"
+              onClick={() => setEditModalOpen(true)}
+            >
               <IoCreateOutline /> Edit Profile
             </button>
           </div>
@@ -297,7 +324,7 @@ const MyProfile = () => {
             </div>
             <div className="profile-stat-content">
               <span className="profile-stat-value">
-                {profileData.stats.rewardPoints.toLocaleString()}
+                {rewardPoints.toLocaleString()}
               </span>
               <span className="profile-stat-label">Reward Points</span>
             </div>
@@ -308,7 +335,7 @@ const MyProfile = () => {
             </div>
             <div className="profile-stat-content">
               <span className="profile-stat-value">
-                {profileData.stats.tasksCompleted}
+                {statsLoading ? "—" : (stats?.tasksCompleted ?? 0)}
               </span>
               <span className="profile-stat-label">Tasks Completed</span>
             </div>
@@ -319,7 +346,7 @@ const MyProfile = () => {
             </div>
             <div className="profile-stat-content">
               <span className="profile-stat-value">
-                {profileData.stats.helpGiven}
+                {statsLoading ? "—" : (stats?.helpGiven ?? 0)}
               </span>
               <span className="profile-stat-label">People Helped</span>
             </div>
@@ -330,11 +357,9 @@ const MyProfile = () => {
             </div>
             <div className="profile-stat-content">
               <span className="profile-stat-value">
-                {profileData.stats.rating}
+                {statsLoading ? "—" : (stats?.totalContracts ?? 0)}
               </span>
-              <span className="profile-stat-label">
-                Rating ({profileData.stats.reviews} reviews)
-              </span>
+              <span className="profile-stat-label">Total Contracts</span>
             </div>
           </div>
         </div>
@@ -370,16 +395,28 @@ const MyProfile = () => {
                     </button>
                   </div>
                   <div className="activity-list">
-                    {profileData.recentActivity.map((item, idx) => (
+                    {recentActivity.length === 0 && (
+                      <p className="no-content-text">
+                        No activity yet. Start helping others to build your
+                        history!
+                      </p>
+                    )}
+                    {recentActivity.slice(0, 4).map((item, idx) => (
                       <div key={idx} className="activity-item">
                         <div
                           className={`activity-icon activity-icon--${item.type}`}
                         >
-                          {item.icon}
+                          {item.type === "helped" ? (
+                            <IoCodeSlashOutline />
+                          ) : (
+                            <IoColorPaletteOutline />
+                          )}
                         </div>
                         <div className="activity-info">
                           <span className="activity-title">{item.title}</span>
-                          <span className="activity-time">{item.time}</span>
+                          <span className="activity-time">
+                            {timeAgo(item.time)}
+                          </span>
                         </div>
                         <span
                           className={`activity-reward activity-reward--${item.type}`}
@@ -391,31 +428,20 @@ const MyProfile = () => {
                   </div>
                 </div>
 
-                {/* Reviews preview */}
+                {/* Stats summary */}
                 <div className="profile-card">
                   <div className="profile-card-header">
-                    <h3>Reviews</h3>
-                    <button
-                      className="profile-card-link"
-                      onClick={() => setActiveTab("reviews")}
-                    >
-                      View All
-                    </button>
+                    <h3>Summary</h3>
                   </div>
                   <div className="reviews-preview">
                     <div className="review-summary">
                       <span className="review-big-rating">
-                        {profileData.stats.rating}
+                        {statsLoading ? "\u2014" : (stats?.totalContracts ?? 0)}
                       </span>
                       <div className="review-stars">
-                        {[...Array(5)].map((_, i) => (
-                          <IoStarSharp
-                            key={i}
-                            className={`star-icon ${i < Math.floor(profileData.stats.rating) ? "star-filled" : "star-empty"}`}
-                          />
-                        ))}
                         <span className="review-count">
-                          {profileData.stats.reviews} reviews
+                          Total Contracts &middot; {stats?.helpGiven ?? 0}{" "}
+                          helped &middot; {stats?.helpReceived ?? 0} received
                         </span>
                       </div>
                     </div>
@@ -430,16 +456,25 @@ const MyProfile = () => {
                   <h3>All Activity</h3>
                 </div>
                 <div className="activity-list">
-                  {profileData.recentActivity.map((item, idx) => (
+                  {recentActivity.length === 0 && (
+                    <p className="no-content-text">No activity yet.</p>
+                  )}
+                  {recentActivity.map((item, idx) => (
                     <div key={idx} className="activity-item">
                       <div
                         className={`activity-icon activity-icon--${item.type}`}
                       >
-                        {item.icon}
+                        {item.type === "helped" ? (
+                          <IoCodeSlashOutline />
+                        ) : (
+                          <IoColorPaletteOutline />
+                        )}
                       </div>
                       <div className="activity-info">
                         <span className="activity-title">{item.title}</span>
-                        <span className="activity-time">{item.time}</span>
+                        <span className="activity-time">
+                          {timeAgo(item.time)}
+                        </span>
                       </div>
                       <span
                         className={`activity-reward activity-reward--${item.type}`}
@@ -458,7 +493,12 @@ const MyProfile = () => {
                   <h3>Skills & Expertise</h3>
                 </div>
                 <div className="skills-list">
-                  {profileData.skills.map((skill) => (
+                  {userSkills.length === 0 && (
+                    <p className="no-content-text">
+                      No skills added yet. Edit your profile to add skills.
+                    </p>
+                  )}
+                  {userSkills.map((skill) => (
                     <span className="skill-tag" key={skill}>
                       {skill}
                     </span>
@@ -473,22 +513,6 @@ const MyProfile = () => {
                   <h3>All Reviews</h3>
                 </div>
                 <div className="reviews-preview">
-                  <div className="review-summary">
-                    <span className="review-big-rating">
-                      {profileData.stats.rating}
-                    </span>
-                    <div className="review-stars">
-                      {[...Array(5)].map((_, i) => (
-                        <IoStarSharp
-                          key={i}
-                          className={`star-icon ${i < Math.floor(profileData.stats.rating) ? "star-filled" : "star-empty"}`}
-                        />
-                      ))}
-                      <span className="review-count">
-                        {profileData.stats.reviews} reviews
-                      </span>
-                    </div>
-                  </div>
                   <p className="no-content-text">
                     Detailed reviews will appear here as you help more people.
                   </p>
@@ -505,7 +529,10 @@ const MyProfile = () => {
                 <h3>Skills</h3>
               </div>
               <div className="skills-list">
-                {profileData.skills.map((skill) => (
+                {userSkills.length === 0 && (
+                  <p className="no-content-text">No skills yet</p>
+                )}
+                {userSkills.map((skill) => (
                   <span className="skill-tag" key={skill}>
                     {skill}
                   </span>
@@ -519,11 +546,19 @@ const MyProfile = () => {
                 <h3>Badges</h3>
               </div>
               <div className="badges-grid">
-                {profileData.badges.map((badge, idx) => (
+                {badges.length === 0 && (
+                  <p className="no-content-text">
+                    Keep helping to earn badges!
+                  </p>
+                )}
+                {badges.map((badge, idx) => (
                   <div className="badge-item" key={idx}>
                     <span
                       className="badge-icon-box"
-                      style={{ background: `${badge.color}15`, color: badge.color }}
+                      style={{
+                        background: `${badge.color}15`,
+                        color: badge.color,
+                      }}
                     >
                       {badge.icon}
                     </span>
@@ -539,16 +574,40 @@ const MyProfile = () => {
                 <h3>Connect</h3>
               </div>
               <div className="social-links-list">
-                <a href="#" className="social-link-item">
-                  <FaGithub /> GitHub
-                </a>
-                <a href="#" className="social-link-item">
-                  <FaLinkedinIn /> LinkedIn
-                </a>
-                <a href="#" className="social-link-item">
-                  <FaTwitter /> Twitter
-                </a>
-                <a href="#" className="social-link-item social-link-item--email">
+                {dbUser?.github && (
+                  <a
+                    href={dbUser.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-link-item"
+                  >
+                    <FaGithub /> GitHub
+                  </a>
+                )}
+                {dbUser?.linkedin && (
+                  <a
+                    href={dbUser.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-link-item"
+                  >
+                    <FaLinkedinIn /> LinkedIn
+                  </a>
+                )}
+                {dbUser?.twitter && (
+                  <a
+                    href={dbUser.twitter}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-link-item"
+                  >
+                    <FaTwitter /> Twitter
+                  </a>
+                )}
+                <a
+                  href={`mailto:${user?.email}`}
+                  className="social-link-item social-link-item--email"
+                >
                   <IoMailOutline /> {user?.email}
                 </a>
               </div>
@@ -559,7 +618,10 @@ const MyProfile = () => {
 
       {/* ══════ EDIT PROFILE MODAL ══════ */}
       {editModalOpen && (
-        <div className="edit-modal-overlay" onClick={() => setEditModalOpen(false)}>
+        <div
+          className="edit-modal-overlay"
+          onClick={() => setEditModalOpen(false)}
+        >
           <div className="edit-modal" onClick={(e) => e.stopPropagation()}>
             <div className="edit-modal-header">
               <h2>Edit Profile</h2>
@@ -580,7 +642,9 @@ const MyProfile = () => {
                     src={editForm.photoURL}
                     alt="Preview"
                     className="edit-avatar-preview"
-                    onError={(e) => { e.target.style.display = 'none'; }}
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                    }}
                   />
                 ) : (
                   <div className="edit-avatar-preview edit-avatar-placeholder">

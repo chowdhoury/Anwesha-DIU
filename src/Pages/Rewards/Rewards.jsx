@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router";
 import {
   IoFlashOutline,
@@ -53,7 +53,11 @@ const TIERS = [
     name: "Newcomer",
     icon: "🌱",
     range: "0 – 199 pts",
-    perks: ["Access to the Skill Marketplace", "Post up to 2 requests/month", "Community forum access"],
+    perks: [
+      "Access to the Skill Marketplace",
+      "Post up to 2 requests/month",
+      "Community forum access",
+    ],
     color: "#6b7280",
     bg: "#f9fafb",
     border: "#e5e7eb",
@@ -62,7 +66,12 @@ const TIERS = [
     name: "Helper",
     icon: "⚡",
     range: "200 – 599 pts",
-    perks: ["Everything in Newcomer", "Post unlimited requests", "Priority listing in search", "Helper badge on profile"],
+    perks: [
+      "Everything in Newcomer",
+      "Post unlimited requests",
+      "Priority listing in search",
+      "Helper badge on profile",
+    ],
     color: "#0891b2",
     bg: "#eff6ff",
     border: "#bfdbfe",
@@ -72,7 +81,12 @@ const TIERS = [
     name: "Expert",
     icon: "🏆",
     range: "600 – 1499 pts",
-    perks: ["Everything in Helper", "Featured profile placement", "Early access to new features", "Expert badge & verified checkmark"],
+    perks: [
+      "Everything in Helper",
+      "Featured profile placement",
+      "Early access to new features",
+      "Expert badge & verified checkmark",
+    ],
     color: "#7c3aed",
     bg: "#f5f3ff",
     border: "#c4b5fd",
@@ -82,23 +96,45 @@ const TIERS = [
     name: "Champion",
     icon: "👑",
     range: "1500+ pts",
-    perks: ["Everything in Expert", "Champion crown + gold profile frame", "Monthly rewards summary report", "Direct community shout-out"],
+    perks: [
+      "Everything in Expert",
+      "Champion crown + gold profile frame",
+      "Monthly rewards summary report",
+      "Direct community shout-out",
+    ],
     color: "#ca8a04",
     bg: "#fffbeb",
     border: "#fde68a",
   },
 ];
 
-const LEADERBOARD = [
-  { rank: 1, name: "Tanvir Ahmed", pts: 2840, initials: "TA", color: "#14a800", badge: "Champion" },
-  { rank: 2, name: "Nusrat Jahan", pts: 2310, initials: "NJ", color: "#db2777", badge: "Champion" },
-  { rank: 3, name: "Rafiqul Islam", pts: 1920, initials: "RI", color: "#7c3aed", badge: "Expert" },
-  { rank: 4, name: "Farhan Hossain", pts: 1540, initials: "FH", color: "#0369a1", badge: "Expert" },
-  { rank: 5, name: "Tasnim Akter", pts: 1280, initials: "TA", color: "#d97706", badge: "Expert" },
-  { rank: 6, name: "Sakib Rahman", pts: 960, initials: "SR", color: "#ea580c", badge: "Helper" },
-  { rank: 7, name: "Maruf Hasan", pts: 820, initials: "MH", color: "#059669", badge: "Helper" },
-  { rank: 8, name: "Ayesha Siddiqua", pts: 640, initials: "AS", color: "#0891b2", badge: "Helper" },
+const AVATAR_COLORS = [
+  "#14a800",
+  "#db2777",
+  "#7c3aed",
+  "#0369a1",
+  "#d97706",
+  "#ea580c",
+  "#059669",
+  "#0891b2",
+  "#6d28d9",
+  "#be185d",
 ];
+
+const getTierBadge = (pts) => {
+  if (pts >= 1500) return "Champion";
+  if (pts >= 600) return "Expert";
+  if (pts >= 200) return "Helper";
+  return "Newcomer";
+};
+
+const getInitials = (name) =>
+  name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
 const FAQ = [
   {
@@ -128,10 +164,72 @@ const RANK_MEDAL = { 1: "🥇", 2: "🥈", 3: "🥉" };
 /* ─── Component ────────────────────────────────────── */
 const Rewards = () => {
   const [openFaq, setOpenFaq] = useState(null);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [communityStats, setCommunityStats] = useState({
+    totalPoints: 0,
+    completedTasks: 0,
+    activeMembers: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [usersRes, projectsRes] = await Promise.all([
+          fetch("http://localhost:3000/users"),
+          fetch("http://localhost:3000/projects/count"),
+        ]);
+        const users = await usersRes.json();
+
+        let completedTasks = 0;
+        try {
+          const pData = await projectsRes.json();
+          completedTasks = pData.completed || 0;
+        } catch (e) {
+          console.error("Failed to fetch project count:", e);
+        }
+
+        const sorted = [...users]
+          .filter((u) => (u.rewardPoints || 0) > 0)
+          .sort((a, b) => (b.rewardPoints || 0) - (a.rewardPoints || 0))
+          .slice(0, 10);
+
+        const board = sorted.map((u, i) => {
+          const name = u.name || u.email?.split("@")[0] || "User";
+          const pts = u.rewardPoints || 0;
+          return {
+            rank: i + 1,
+            name,
+            pts,
+            initials: getInitials(name),
+            color: AVATAR_COLORS[i % AVATAR_COLORS.length],
+            badge: getTierBadge(pts),
+            profilePicture: u.profilePicture || null,
+          };
+        });
+
+        setLeaderboard(board);
+
+        const totalPoints = users.reduce(
+          (sum, u) => sum + (u.rewardPoints || 0),
+          0,
+        );
+        setCommunityStats({
+          totalPoints,
+          completedTasks,
+          activeMembers: users.length,
+        });
+      } catch (err) {
+        console.error("Failed to fetch rewards data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <div className="rewards-page">
-
       {/* ══════ HERO ══════ */}
       <section className="rw-hero">
         <div className="rw-hero-bg-orbs">
@@ -145,7 +243,8 @@ const Rewards = () => {
               <IoFlashOutline /> Rewards System
             </span>
             <h1>
-              Help Others.<br />
+              Help Others.
+              <br />
               <span className="rw-hero-gradient-text">Earn Rewards.</span>
             </h1>
             <p>
@@ -166,17 +265,23 @@ const Rewards = () => {
             <div className="rw-hero-card-label">Community Stats</div>
             <div className="rw-hero-stats">
               <div className="rw-hero-stat">
-                <span className="rw-hero-stat-num">42,000+</span>
+                <span className="rw-hero-stat-num">
+                  {communityStats.totalPoints.toLocaleString()}
+                </span>
                 <span className="rw-hero-stat-label">Points Distributed</span>
               </div>
               <div className="rw-hero-stat-divider" />
               <div className="rw-hero-stat">
-                <span className="rw-hero-stat-num">3,800+</span>
+                <span className="rw-hero-stat-num">
+                  {communityStats.completedTasks.toLocaleString()}
+                </span>
                 <span className="rw-hero-stat-label">Tasks Completed</span>
               </div>
               <div className="rw-hero-stat-divider" />
               <div className="rw-hero-stat">
-                <span className="rw-hero-stat-num">1,200+</span>
+                <span className="rw-hero-stat-num">
+                  {communityStats.activeMembers.toLocaleString()}
+                </span>
                 <span className="rw-hero-stat-label">Active Members</span>
               </div>
             </div>
@@ -190,7 +295,9 @@ const Rewards = () => {
           <div className="rw-section-header">
             <span className="rw-section-eyebrow">Simple Process</span>
             <h2>How Rewards Work</h2>
-            <p>Four simple steps from helping to earning — no money involved.</p>
+            <p>
+              Four simple steps from helping to earning — no money involved.
+            </p>
           </div>
           <div className="rw-how-steps">
             {HOW_IT_WORKS.map((step) => (
@@ -198,7 +305,10 @@ const Rewards = () => {
                 <div className="rw-how-step-num" style={{ color: step.color }}>
                   {step.step}
                 </div>
-                <div className="rw-how-icon" style={{ background: step.color + "18", color: step.color }}>
+                <div
+                  className="rw-how-icon"
+                  style={{ background: step.color + "18", color: step.color }}
+                >
                   {step.icon}
                 </div>
                 <h3>{step.title}</h3>
@@ -215,25 +325,37 @@ const Rewards = () => {
           <div className="rw-section-header">
             <span className="rw-section-eyebrow">Membership Tiers</span>
             <h2>Climb the Ranks</h2>
-            <p>The more you contribute, the higher your standing — and your perks.</p>
+            <p>
+              The more you contribute, the higher your standing — and your
+              perks.
+            </p>
           </div>
           <div className="rw-tiers-grid">
             {TIERS.map((tier) => (
               <div
                 key={tier.name}
                 className={`rw-tier-card ${tier.popular ? "rw-tier-card--popular" : ""}`}
-                style={{ "--tier-color": tier.color, "--tier-bg": tier.bg, "--tier-border": tier.border }}
+                style={{
+                  "--tier-color": tier.color,
+                  "--tier-bg": tier.bg,
+                  "--tier-border": tier.border,
+                }}
               >
                 {tier.popular && (
                   <div className="rw-tier-popular-badge">Most Achieved</div>
                 )}
                 <div className="rw-tier-icon">{tier.icon}</div>
-                <h3 className="rw-tier-name" style={{ color: tier.color }}>{tier.name}</h3>
+                <h3 className="rw-tier-name" style={{ color: tier.color }}>
+                  {tier.name}
+                </h3>
                 <div className="rw-tier-range">{tier.range}</div>
                 <ul className="rw-tier-perks">
                   {tier.perks.map((p, i) => (
                     <li key={i}>
-                      <IoCheckmarkCircle className="rw-tier-check" style={{ color: tier.color }} />
+                      <IoCheckmarkCircle
+                        className="rw-tier-check"
+                        style={{ color: tier.color }}
+                      />
                       {p}
                     </li>
                   ))}
@@ -255,35 +377,77 @@ const Rewards = () => {
             <p>Our most generous community members this month.</p>
           </div>
           <div className="rw-lb-table">
-            {LEADERBOARD.map((member) => (
+            {loading ? (
               <div
-                key={member.rank}
-                className={`rw-lb-row ${member.rank <= 3 ? "rw-lb-row--top" : ""}`}
+                style={{
+                  textAlign: "center",
+                  padding: "40px 0",
+                  color: "rgba(255,255,255,0.6)",
+                }}
               >
-                <div className="rw-lb-rank">
-                  {RANK_MEDAL[member.rank] || `#${member.rank}`}
-                </div>
-                <div className="rw-lb-avatar" style={{ background: member.color }}>
-                  {member.initials}
-                </div>
-                <div className="rw-lb-name">{member.name}</div>
-                <div className="rw-lb-badge-wrap">
-                  <span className={`rw-lb-badge rw-lb-badge--${member.badge.toLowerCase()}`}>
-                    {member.badge}
-                  </span>
-                </div>
-                <div className="rw-lb-pts">
-                  <IoFlashOutline className="rw-lb-pts-icon" />
-                  {member.pts.toLocaleString()} pts
-                </div>
-                <div className="rw-lb-bar-wrap">
-                  <div
-                    className="rw-lb-bar"
-                    style={{ width: `${(member.pts / 2840) * 100}%` }}
-                  />
-                </div>
+                Loading leaderboard...
               </div>
-            ))}
+            ) : leaderboard.length === 0 ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "40px 0",
+                  color: "rgba(255,255,255,0.6)",
+                }}
+              >
+                No contributors yet. Be the first!
+              </div>
+            ) : (
+              leaderboard.map((member) => (
+                <div
+                  key={member.rank}
+                  className={`rw-lb-row ${member.rank <= 3 ? "rw-lb-row--top" : ""}`}
+                >
+                  <div className="rw-lb-rank">
+                    {RANK_MEDAL[member.rank] || `#${member.rank}`}
+                  </div>
+                  <div
+                    className="rw-lb-avatar"
+                    style={{ background: member.color }}
+                  >
+                    {member.profilePicture ? (
+                      <img
+                        src={member.profilePicture}
+                        alt={member.name}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      member.initials
+                    )}
+                  </div>
+                  <div className="rw-lb-name">{member.name}</div>
+                  <div className="rw-lb-badge-wrap">
+                    <span
+                      className={`rw-lb-badge rw-lb-badge--${member.badge.toLowerCase()}`}
+                    >
+                      {member.badge}
+                    </span>
+                  </div>
+                  <div className="rw-lb-pts">
+                    <IoFlashOutline className="rw-lb-pts-icon" />
+                    {member.pts.toLocaleString()} pts
+                  </div>
+                  <div className="rw-lb-bar-wrap">
+                    <div
+                      className="rw-lb-bar"
+                      style={{
+                        width: `${(member.pts / (leaderboard[0]?.pts || 1)) * 100}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              ))
+            )}
           </div>
           <div className="rw-lb-footer">
             <Link to="/my-rewards" className="rw-lb-see-mine">
@@ -298,21 +462,34 @@ const Rewards = () => {
         <div className="rw-section-inner rw-why-inner">
           <div className="rw-why-text">
             <span className="rw-section-eyebrow">Why It Works</span>
-            <h2>A Fair Economy<br />Built on Trust</h2>
+            <h2>
+              A Fair Economy
+              <br />
+              Built on Trust
+            </h2>
             <p>
               Unlike cash-based platforms, Anwesha's reward system keeps the
               community honest and collaborative. Everyone starts equal, and
               your standing is purely earned through contribution.
             </p>
             <ul className="rw-why-list">
-              <li><IoShieldCheckmarkOutline /> No pay-to-win — points can only be earned</li>
-              <li><IoPeopleOutline /> Community-moderated ratings</li>
-              <li><IoRocketOutline /> Incentivizes quality over quantity</li>
-              <li><IoFlashOutline /> Instant point credit on completion</li>
+              <li>
+                <IoShieldCheckmarkOutline /> No pay-to-win — points can only be
+                earned
+              </li>
+              <li>
+                <IoPeopleOutline /> Community-moderated ratings
+              </li>
+              <li>
+                <IoRocketOutline /> Incentivizes quality over quantity
+              </li>
+              <li>
+                <IoFlashOutline /> Instant point credit on completion
+              </li>
             </ul>
-            <Link to="/my-rewards" className="rw-cta-primary">
+            {/* <Link to="/my-rewards" className="rw-cta-primary">
               View My Rewards <IoArrowForward />
-            </Link>
+            </Link> */}
           </div>
           <div className="rw-why-visual">
             <div className="rw-why-card rw-why-card--1">
@@ -332,7 +509,7 @@ const Rewards = () => {
             </div>
             <div className="rw-why-card rw-why-card--4">
               <IoPeopleOutline />
-              <span>1,200+</span>
+              <span>{communityStats.activeMembers.toLocaleString()}</span>
               <small>Active Members</small>
             </div>
           </div>
@@ -373,18 +550,23 @@ const Rewards = () => {
         <div className="rw-cta-banner-inner">
           <IoRocketOutline className="rw-cta-banner-icon" />
           <h2>Ready to Start Earning?</h2>
-          <p>Join thousands of community members already trading skills for rewards.</p>
+          <p>
+            Join thousands of community members already trading skills for
+            rewards.
+          </p>
           <div className="rw-cta-banner-btns">
             <Link to="/skill-marketplace" className="rw-cta-primary">
               <IoStorefrontOutline /> Explore Marketplace
             </Link>
-            <Link to="/post-skill" className="rw-cta-secondary rw-cta-secondary--dark">
+            <Link
+              to="/post-skill"
+              className="rw-cta-secondary rw-cta-secondary--dark"
+            >
               Offer a Skill <IoArrowForward />
             </Link>
           </div>
         </div>
       </section>
-
     </div>
   );
 };

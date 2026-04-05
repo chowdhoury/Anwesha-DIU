@@ -18,7 +18,8 @@ import toast from "react-hot-toast";
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const { signInWithGoogle, user, updateUserProfile, createUser } = useContext(AuthContext);
+  const { signInWithGoogle, updateUserProfile, createUser } =
+    useContext(AuthContext);
   const navigate = useNavigate();
   const {
     register,
@@ -27,12 +28,33 @@ const SignUp = () => {
     formState: { errors },
   } = useForm();
 
+  const createUserInDb = async (authUser, fallbackName = "") => {
+    const response = await fetch("http://localhost:3000/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: authUser?.uid || "",
+        email: authUser?.email || "",
+        name: authUser?.displayName || fallbackName,
+        profilePicture: authUser?.photoURL || "",
+        rewardPoints: 100,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to save user in database");
+    }
+  };
+
   const onSubmit = async (data) => {
     const { firstName, lastName, email, password } = data;
     const fullName = `${firstName} ${lastName}`;
     try {
-      await createUser(email, password);
+      const result = await createUser(email, password);
       await updateUserProfile(fullName);
+      await createUserInDb(result?.user, fullName);
       toast.success("Signup Successful");
       navigate("/");
     } catch (err) {
@@ -43,7 +65,8 @@ const SignUp = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signInWithGoogle();
+      const result = await signInWithGoogle();
+      await createUserInDb(result?.user);
       toast.success("Google sign-in successful!");
       navigate("/");
     } catch (error) {

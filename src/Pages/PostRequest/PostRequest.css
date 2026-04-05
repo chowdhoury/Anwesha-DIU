@@ -127,8 +127,14 @@
 }
 
 @keyframes pr-fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .pr-form-title {
@@ -345,6 +351,48 @@
   color: #ef4444;
 }
 
+/* Skill Search & Select Dropdown */
+.pr-skill-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.pr-skill-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.pr-skill-option {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #001e00;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.pr-skill-option:hover {
+  background: #f0faf0;
+  color: #14a800;
+}
+
+.pr-skill-option:first-child {
+  border-radius: 0;
+}
+
+.pr-skill-option:last-child {
+  border-radius: 0 0 10px 10px;
+}
+
 /* ── Points Input ── */
 .pr-pts-input-wrap {
   display: flex;
@@ -360,6 +408,38 @@
   font-size: 13px;
   font-weight: 700;
   color: #14a800;
+}
+
+/* ── Points Suggestions ── */
+.pr-pts-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.pr-pts-suggestion-btn {
+  padding: 8px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  background: #f8f9fa;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pr-pts-suggestion-btn:hover {
+  border-color: #14a800;
+  color: #14a800;
+  background: #f0fff0;
+}
+
+.pr-pts-suggestion-btn.active {
+  border-color: #14a800;
+  background: #14a800;
+  color: #fff;
 }
 
 /* ── Tip ── */
@@ -554,6 +634,24 @@
   box-shadow: 0 8px 28px rgba(20, 168, 0, 0.35);
 }
 
+.pr-submit-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.pr-submit-error {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 14px;
+  text-align: center;
+}
+
 /* ════════════ PREVIEW CARD ════════════ */
 .pr-preview-card {
   background: #f9fbf9;
@@ -592,6 +690,23 @@
   background: #fffbeb;
   border-color: #fde68a;
   color: #b45309;
+}
+
+.pr-preview-urgency--critical {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+  animation: pulse-critical 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-critical {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 /* Preview Header */
@@ -755,8 +870,14 @@
 }
 
 @keyframes pr-pop {
-  from { transform: scale(0); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .pr-success h2 {
@@ -777,7 +898,13 @@
   display: flex;
   gap: 12px;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+}
+
+@media (max-width: 600px) {
+  .pr-success-actions {
+    flex-wrap: wrap;
+  }
 }
 
 .pr-success-btn {
@@ -793,6 +920,8 @@
   font-family: inherit;
   border: none;
   transition: all 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .pr-success-btn--primary {

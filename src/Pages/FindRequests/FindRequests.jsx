@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router";
 import {
   IoSearchOutline,
@@ -17,108 +17,57 @@ import {
 import "./FindRequests.css";
 
 /* ─── Static Data ──────────────────── */
-const CATEGORIES = ["All", "Tech", "Design", "Writing", "Education", "Music", "Business", "Lifestyle"];
-
-const REQUESTS = [
-  {
-    id: 1,
-    title: "Need a React Developer to Fix Auth Flow",
-    category: "Tech",
-    poster: "Ashraful Alam",
-    initials: "AA",
-    avatarColor: "#7c3aed",
-    location: "Remote",
-    postedAgo: "2h ago",
-    deadline: "3 days",
-    points: 120,
-    rating: 4.8,
-    desc: "Looking for someone to fix a Firebase authentication bug in my React app. The sign-up flow breaks on mobile.",
-    tags: ["React", "Firebase", "Auth"],
-    urgency: "high",
-  },
-  {
-    id: 2,
-    title: "Logo & Brand Identity Design",
-    category: "Design",
-    poster: "Sumaiya Khatun",
-    initials: "SK",
-    avatarColor: "#ea580c",
-    location: "Remote",
-    postedAgo: "5h ago",
-    deadline: "1 week",
-    points: 90,
-    rating: 4.6,
-    desc: "I need a modern logo for my startup. Looking for a clean, minimal aesthetic with a green color palette.",
-    tags: ["Figma", "Branding", "Logo"],
-    urgency: "medium",
-  },
-  {
-    id: 3,
-    title: "Proofreading & Editing for Research Paper",
-    category: "Writing",
-    poster: "Kamrul Hasan",
-    initials: "KH",
-    avatarColor: "#0369a1",
-    location: "Remote",
-    postedAgo: "1d ago",
-    deadline: "5 days",
-    points: 60,
-    rating: 4.9,
-    desc: "Need someone with academic writing experience to proofread my 15-page research paper on machine learning ethics.",
-    tags: ["Academic", "Proofreading", "ML"],
-    urgency: "low",
-  },
-  {
-    id: 4,
-    title: "Guitar Lessons for Beginner (Online)",
-    category: "Music",
-    poster: "Farhana Yeasmin",
-    initials: "FY",
-    avatarColor: "#db2777",
-    location: "Online",
-    postedAgo: "3h ago",
-    deadline: "Flexible",
-    points: 50,
-    rating: 4.7,
-    desc: "Looking for a patient guitar teacher for weekly online lessons. I'm a complete beginner and want to learn pop songs.",
-    tags: ["Guitar", "Beginner", "Weekly"],
-    urgency: "low",
-  },
-  {
-    id: 5,
-    title: "Python Data Analysis – CSV Dashboard",
-    category: "Tech",
-    poster: "Imran Chowdhury",
-    initials: "IC",
-    avatarColor: "#d97706",
-    location: "Remote",
-    postedAgo: "6h ago",
-    deadline: "2 days",
-    points: 200,
-    rating: 4.5,
-    desc: "Need a Python script or Jupyter notebook to analyze sales data from CSV files and generate charts using Pandas and Matplotlib.",
-    tags: ["Python", "Pandas", "Data"],
-    urgency: "high",
-  },
-  {
-    id: 6,
-    title: "Business Plan Review & Feedback",
-    category: "Business",
-    poster: "Nazmul Karim",
-    initials: "NK",
-    avatarColor: "#059669",
-    location: "Remote",
-    postedAgo: "2d ago",
-    deadline: "1 week",
-    points: 80,
-    rating: 4.4,
-    desc: "I've written a business plan for a SaaS product and need an experienced entrepreneur or business analyst to review it.",
-    tags: ["Business", "SaaS", "Strategy"],
-    urgency: "medium",
-  },
+const CATEGORIES = [
+  "All",
+  "Development & IT",
+  "Design & Creative",
+  "Writing & Translation",
+  "Education",
+  "Music",
+  "Business",
+  "Lifestyle",
 ];
 
 const SORT_OPTIONS = ["Newest", "Most Points", "Urgent First", "Top Rated"];
+
+/* ─── Helper Functions ──────────────────── */
+const getTimeAgo = (dateString) => {
+  if (!dateString) return "Recently";
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${diffDays}d ago`;
+};
+
+const getInitials = (name) => {
+  if (!name) return "U";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+const getAvatarColor = (name) => {
+  const colors = [
+    "#7c3aed",
+    "#ea580c",
+    "#0369a1",
+    "#db2777",
+    "#d97706",
+    "#059669",
+  ];
+  if (!name) return colors[0];
+  const index = name.charCodeAt(0) % colors.length;
+  return colors[index];
+};
 
 /* ─── Component ─────────────────────── */
 const FindRequests = () => {
@@ -127,14 +76,58 @@ const FindRequests = () => {
   const [sortBy, setSortBy] = useState("Newest");
   const [viewMode, setViewMode] = useState("grid");
   const [bookmarked, setBookmarked] = useState([]);
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch posts from API
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("http://localhost:3000/posts");
+        if (!response.ok) {
+          throw new Error("Failed to fetch posts");
+        }
+        const data = await response.json();
+        // Transform API data to match component structure
+        const transformedData = data.map((post) => ({
+          id: post._id,
+          title: post.title,
+          category: post.category,
+          poster: post.author?.displayName || "Anonymous",
+          photoURL: post.author?.photoURL,
+          initials: getInitials(post.author?.displayName),
+          avatarColor: getAvatarColor(post.author?.displayName),
+          location: post.location || "Remote",
+          postedAgo: getTimeAgo(post.createdAt),
+          deadline: post.deadline,
+          points: post.rewardPoints,
+          rating: 4.5,
+          desc: post.description,
+          tags: post.tags || [],
+          urgency: post.urgency?.toLowerCase() || "medium",
+        }));
+        setRequests(transformedData);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+        console.error("Error fetching posts:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   const toggleBookmark = (id) => {
     setBookmarked((prev) =>
-      prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id],
     );
   };
 
-  const filtered = REQUESTS.filter((r) => {
+  const filtered = requests.filter((r) => {
     const matchSearch =
       r.title.toLowerCase().includes(search.toLowerCase()) ||
       r.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
@@ -155,7 +148,8 @@ const FindRequests = () => {
             <IoFlashOutline /> Open Requests
           </span>
           <h1>
-            Find Someone to Help.<br />
+            Find Someone to Help.
+            <br />
             <span className="fr-hero-gradient">Earn Rewards.</span>
           </h1>
           <p>
@@ -223,31 +217,74 @@ const FindRequests = () => {
 
           {/* Results count */}
           <div className="fr-results-count">
-            <span>{filtered.length} open request{filtered.length !== 1 ? "s" : ""}</span>
+            <span>
+              {filtered.length} open request{filtered.length !== 1 ? "s" : ""}
+            </span>
             {activeCategory !== "All" && (
-              <span className="fr-results-cat"> in <strong>{activeCategory}</strong></span>
+              <span className="fr-results-cat">
+                {" "}
+                in <strong>{activeCategory}</strong>
+              </span>
             )}
           </div>
 
           {/* Cards Grid / List */}
-          {filtered.length > 0 ? (
-            <div className={`fr-cards ${viewMode === "list" ? "fr-cards--list" : ""}`}>
+          {loading ? (
+            <div className="fr-empty">
+              <span className="fr-empty-icon">⏳</span>
+              <h3>Loading requests...</h3>
+              <p>Please wait while we fetch the latest requests.</p>
+            </div>
+          ) : error ? (
+            <div className="fr-empty">
+              <span className="fr-empty-icon">⚠️</span>
+              <h3>Error loading requests</h3>
+              <p>{error}</p>
+            </div>
+          ) : filtered.length > 0 ? (
+            <div
+              className={`fr-cards ${viewMode === "list" ? "fr-cards--list" : ""}`}
+            >
               {filtered.map((req) => (
-                <div key={req.id} className={`fr-card ${viewMode === "list" ? "fr-card--list" : ""}`}>
+                <div
+                  key={req.id}
+                  className={`fr-card ${viewMode === "list" ? "fr-card--list" : ""}`}
+                  style={{ position: "relative" }}
+                >
                   {/* Urgency indicator */}
                   {req.urgency === "high" && (
-                    <div className="fr-urgency-badge">🔥 Urgent</div>
+                    <div
+                      className="fr-urgency-badge"
+                      style={{
+                        position: "absolute",
+                        top: "12px",
+                        right: "12px",
+                        zIndex: 10,
+                      }}
+                    >
+                      🔥 Urgent
+                    </div>
                   )}
 
                   {/* Card Header */}
                   <div className="fr-card-header">
                     <div className="fr-poster">
-                      <div
-                        className="fr-poster-avatar"
-                        style={{ background: req.avatarColor }}
-                      >
-                        {req.initials}
-                      </div>
+                      {req.photoURL ? (
+                        <img
+                          src={req.photoURL}
+                          alt={req.poster}
+                          referrerPolicy="no-referrer"
+                          className="fr-poster-avatar"
+                          style={{ objectFit: "cover" }}
+                        />
+                      ) : (
+                        <div
+                          className="fr-poster-avatar"
+                          style={{ background: req.avatarColor }}
+                        >
+                          {req.initials}
+                        </div>
+                      )}
                       <div>
                         <span className="fr-poster-name">{req.poster}</span>
                         <span className="fr-poster-rating">
@@ -255,13 +292,13 @@ const FindRequests = () => {
                         </span>
                       </div>
                     </div>
-                    <button
+                    {/* <button
                       className={`fr-bookmark-btn ${bookmarked.includes(req.id) ? "fr-bookmark-btn--saved" : ""}`}
                       onClick={() => toggleBookmark(req.id)}
                       aria-label="Bookmark request"
                     >
                       <IoBookmarkOutline />
-                    </button>
+                    </button> */}
                   </div>
 
                   {/* Category pill */}
@@ -298,8 +335,8 @@ const FindRequests = () => {
                     <div className="fr-pts-badge">
                       <IoFlashOutline /> {req.points} pts
                     </div>
-                    <Link to={`/skill-marketplace`} className="fr-apply-btn">
-                      Apply to Help <IoArrowForward />
+                    <Link to={`/request/${req.id}`} className="fr-apply-btn">
+                      View Details <IoArrowForward />
                     </Link>
                   </div>
                 </div>
@@ -321,11 +358,25 @@ const FindRequests = () => {
           <IoCashOutline className="fr-cta-icon" />
           <h2>Need help with something?</h2>
           <p>Post a request and let skilled community members come to you.</p>
-          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "1rem",
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}
+          >
             <Link to="/post-request" className="fr-cta-btn">
               Post a Request <IoArrowForward />
             </Link>
-            <Link to="/post-skill" className="fr-cta-btn" style={{ background: "rgba(255,255,255,0.08)", boxShadow: "none" }}>
+            <Link
+              to="/post-skill"
+              className="fr-cta-btn"
+              style={{
+                background: "rgba(255,255,255,0.08)",
+                boxShadow: "none",
+              }}
+            >
               Offer a Skill <IoArrowForward />
             </Link>
           </div>

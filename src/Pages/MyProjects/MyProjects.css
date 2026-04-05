@@ -1,0 +1,514 @@
+/* ═══════════════  MY PROJECTS  ═══════════════ */
+.myprojects {
+  padding: 0;
+}
+
+.myprojects-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 40vh;
+  color: #64748b;
+}
+
+.myprojects-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Header */
+.myprojects-header {
+  margin-bottom: 1.5rem;
+}
+
+.myprojects-title {
+  font-size: 1.625rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+}
+
+.myprojects-subtitle {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+/* Stats */
+.myprojects-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.myprojects-stat {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: box-shadow 0.2s;
+}
+
+.myprojects-stat:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.stat-icon--active {
+  background: #fef3c7;
+  color: #f59e0b;
+}
+
+.stat-icon--completed {
+  background: #d1fae5;
+  color: #10b981;
+}
+
+.stat-icon--total {
+  background: #e0e7ff;
+  color: #6366f1;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Filters */
+.myprojects-filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  border-color: #6366f1;
+  color: #6366f1;
+}
+
+.filter-btn--active {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: #fff;
+}
+
+/* Empty State */
+.myprojects-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: #cbd5e1;
+  margin-bottom: 1rem;
+}
+
+.myprojects-empty h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.myprojects-empty p {
+  color: #64748b;
+  margin-bottom: 1.5rem;
+  max-width: 400px;
+  margin-inline: auto;
+}
+
+.empty-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.empty-btn {
+  padding: 0.6rem 1.5rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.empty-btn--primary {
+  background: #6366f1;
+  color: #fff;
+}
+
+.empty-btn--primary:hover {
+  background: #4f46e5;
+}
+
+.empty-btn--secondary {
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  background: #fff;
+}
+
+.empty-btn--secondary:hover {
+  border-color: #6366f1;
+  color: #6366f1;
+}
+
+/* Projects list */
+.myprojects-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.project-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.project-card:hover {
+  border-color: #c7d2fe;
+  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.08);
+  transform: translateY(-2px);
+}
+
+.project-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.role-badge--helper {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.role-badge--requester {
+  background: #fce7f3;
+  color: #db2777;
+}
+
+.project-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.project-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 0.75rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.project-card-meta {
+  display: flex;
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+/* Progress */
+.project-progress {
+  margin-bottom: 0.75rem;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: 0.4rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.project-card-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.project-view-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: #6366f1;
+  font-weight: 500;
+}
+
+/* Description */
+.project-card-desc {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Tags */
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.project-tag {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.project-tag--more {
+  background: #e0e7ff;
+  color: #6366f1;
+}
+
+/* Meta chip */
+.meta-chip {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Members */
+.project-members {
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.project-members-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.5rem;
+}
+
+.project-members-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.project-member {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.project-member-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.project-member-avatar--placeholder {
+  background: #e0e7ff;
+  color: #6366f1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.project-member-name {
+  font-size: 0.8rem;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.project-member-role {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  text-transform: capitalize;
+}
+
+.project-member-role--owner {
+  background: #fce7f3;
+  color: #db2777;
+}
+
+.project-member-role--helper {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+/* Project Chat button */
+.project-chat-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  background: #6366f1;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.project-chat-btn:hover {
+  background: #4f46e5;
+  border-color: #4f46e5;
+}
+
+/* Message button */
+.project-message-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid #e0e7ff;
+  border-radius: 8px;
+  background: #fff;
+  color: #6366f1;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.project-message-btn:hover {
+  background: #eef2ff;
+  border-color: #6366f1;
+}
+
+.project-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.project-card-footer .project-view-link {
+  margin-left: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .myprojects-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .project-members-list {
+    flex-direction: column;
+  }
+}

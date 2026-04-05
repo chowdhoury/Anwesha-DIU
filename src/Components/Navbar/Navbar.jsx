@@ -18,6 +18,7 @@ import {
   IoDocumentTextOutline,
   IoLogOutOutline,
   IoSpeedometerOutline,
+  IoHomeOutline,
 } from "react-icons/io5";
 import Logo from "../Logo/Logo";
 import { AuthContext } from "../../Authentication/AuthContext";
@@ -27,7 +28,7 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
-  const { user, logOut } = useContext(AuthContext);
+  const { user, logOut, dbUser } = useContext(AuthContext);
   const navRef = useRef(null);
   const location = useLocation();
 
@@ -92,28 +93,58 @@ const Navbar = () => {
       label: "Get Help",
       key: "gethelp",
       items: [
-        { to: "/post-request", icon: <IoHandLeftOutline />, label: "Post a Request", desc: "Get help from the community" },
+        {
+          to: "/post-request",
+          icon: <IoHandLeftOutline />,
+          label: "Post a Request",
+          desc: "Get help from the community",
+        },
         // { to: "/skill-marketplace", icon: <IoSearchOutline />, label: "Browse Helpers", desc: "Find skilled people nearby" },
-        { to: "/skill-marketplace", icon: <IoStorefrontOutline />, label: "Skill Marketplace", desc: "Explore available skills" },
-        { to: "/project-catalog", icon: <IoGridOutline />, label: "Project Catalog", desc: "Browse active projects" },
+        {
+          to: "/skill-marketplace",
+          icon: <IoStorefrontOutline />,
+          label: "Skill Marketplace",
+          desc: "Explore available skills",
+        },
+        // { to: "/project-catalog", icon: <IoGridOutline />, label: "Project Catalog", desc: "Browse active projects" },
       ],
     },
     {
       label: "Offer Help",
       key: "offerhelp",
       items: [
-        { to: "/find-requests", icon: <IoRocketOutline />, label: "Find Requests", desc: "Help others & earn rewards" },
+        {
+          to: "/find-requests",
+          icon: <IoRocketOutline />,
+          label: "Find Requests",
+          desc: "Help others & earn rewards",
+        },
         // { to: "/my-rewards", icon: <IoTrophyOutline />, label: "My Rewards", desc: "View your earned rewards" },
-        { to: "/post-skill", icon: <IoDocumentTextOutline />, label: "Offer a Skill", desc: "List your skill on the marketplace" },
+        {
+          to: "/post-skill",
+          icon: <IoDocumentTextOutline />,
+          label: "Offer a Skill",
+          desc: "List your skill on the marketplace",
+        },
       ],
     },
     {
       label: "Why Anwesha",
       key: "why",
       items: [
-        { to: "/rewards", icon: <IoHelpCircleOutline />, label: "How Rewards Work", desc: "Understand the reward system" },
+        {
+          to: "/rewards",
+          icon: <IoHelpCircleOutline />,
+          label: "How Rewards Work",
+          desc: "Understand the reward system",
+        },
         // { to: "/community", icon: <IoStarOutline />, label: "Success Stories", desc: "Real stories from members" },
-        { to: "/community", icon: <IoPeopleOutline />, label: "Community", desc: "Join the conversation" },
+        {
+          to: "/community",
+          icon: <IoPeopleOutline />,
+          label: "Community",
+          desc: "Join the conversation",
+        },
       ],
     },
   ];
@@ -132,6 +163,12 @@ const Navbar = () => {
 
           {/* Desktop Nav Links */}
           <ul className="nav-links">
+            <li className="nav-item">
+              <Link to="/" className="nav-link">
+                <IoHomeOutline className="nav-link-icon" />
+                Home
+              </Link>
+            </li>
             {navMenus.map((menu) => (
               <li
                 key={menu.key}
@@ -150,15 +187,15 @@ const Navbar = () => {
                 <div className="dropdown-menu">
                   <div className="dropdown-menu-inner">
                     {menu.items.map((item, idx) => (
-                      <Link
-                        key={idx}
-                        to={item.to}
-                        className="dropdown-item"
-                      >
+                      <Link key={idx} to={item.to} className="dropdown-item">
                         <span className="dropdown-item-icon">{item.icon}</span>
                         <div className="dropdown-item-text">
-                          <span className="dropdown-item-label">{item.label}</span>
-                          <span className="dropdown-item-desc">{item.desc}</span>
+                          <span className="dropdown-item-label">
+                            {item.label}
+                          </span>
+                          <span className="dropdown-item-desc">
+                            {item.desc}
+                          </span>
                         </div>
                       </Link>
                     ))}
@@ -166,76 +203,95 @@ const Navbar = () => {
                 </div>
               </li>
             ))}
-            <li className="nav-item">
+            {/* <li className="nav-item">
               <Link to="/rewards" className="nav-link">
                 <IoFlashOutline className="nav-link-icon" />
                 Rewards
               </Link>
-            </li>
+            </li> */}
           </ul>
 
           {/* Right Side */}
           <div className="nav-right">
             {user ? (
-              <div
-                className={`nav-profile ${activeDropdown === "profile" ? "nav-item--open" : ""}`}
-                onMouseEnter={() => setActiveDropdown("profile")}
-                onMouseLeave={() => setActiveDropdown(null)}
-              >
-                <button
-                  className="nav-avatar-btn"
-                  onClick={() => handleDropdown("profile")}
+              <>
+                <Link to="/my-rewards" className="nav-reward-badge">
+                  <IoTrophyOutline />
+                  <span className="nav-reward-points">
+                    {dbUser?.rewardPoints ?? 0} pts
+                  </span>
+                </Link>
+                <div
+                  className={`nav-profile ${activeDropdown === "profile" ? "nav-item--open" : ""}`}
+                  onMouseEnter={() => setActiveDropdown("profile")}
+                  onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  {user.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt={user.displayName}
-                      className="nav-avatar-img"
-                    />
-                  ) : (
-                    <span className="nav-avatar-initials">
-                      {getInitials(user.displayName)}
-                    </span>
-                  )}
-                  <IoChevronDown className="nav-avatar-chevron" />
-                </button>
-                <div className="dropdown-menu dropdown-menu--profile">
-                  <div className="dropdown-profile-header">
-                    <span className="dropdown-profile-name">
-                      {user.displayName || "User"}
-                    </span>
-                    <span className="dropdown-profile-email">
-                      {user.email}
-                    </span>
-                  </div>
-                  <div className="dropdown-divider" />
-                  <div className="dropdown-menu-inner">
-                    <Link to="/dashboard" className="dropdown-item">
-                      <span className="dropdown-item-icon"><IoSpeedometerOutline /></span>
-                      <div className="dropdown-item-text">
-                        <span className="dropdown-item-label">Dashboard</span>
-                      </div>
-                    </Link>
-                    <Link to="/my-profile" className="dropdown-item">
-                      <span className="dropdown-item-icon"><IoPersonOutline /></span>
-                      <div className="dropdown-item-text">
-                        <span className="dropdown-item-label">My Profile</span>
-                      </div>
-                    </Link>
-                    <Link to="/my-rewards" className="dropdown-item">
-                      <span className="dropdown-item-icon"><IoTrophyOutline /></span>
-                      <div className="dropdown-item-text">
-                        <span className="dropdown-item-label">My Rewards</span>
-                      </div>
-                    </Link>
-                  </div>
-                  <div className="dropdown-divider" />
-                  <button className="dropdown-logout" onClick={handleLogout}>
-                    <IoLogOutOutline />
-                    Sign Out
+                  <button
+                    className="nav-avatar-btn"
+                    onClick={() => handleDropdown("profile")}
+                  >
+                    {user.photoURL ? (
+                      <img
+                        src={user.photoURL}
+                        alt={user.displayName}
+                        referrerPolicy="no-referrer"
+                        className="nav-avatar-img"
+                      />
+                    ) : (
+                      <span className="nav-avatar-initials">
+                        {getInitials(user.displayName)}
+                      </span>
+                    )}
+                    <IoChevronDown className="nav-avatar-chevron" />
                   </button>
+                  <div className="dropdown-menu dropdown-menu--profile">
+                    <div className="dropdown-profile-header">
+                      <span className="dropdown-profile-name">
+                        {user.displayName || "User"}
+                      </span>
+                      <span className="dropdown-profile-email">
+                        {user.email}
+                      </span>
+                    </div>
+                    <div className="dropdown-divider" />
+                    <div className="dropdown-menu-inner">
+                      <Link to="/dashboard" className="dropdown-item">
+                        <span className="dropdown-item-icon">
+                          <IoSpeedometerOutline />
+                        </span>
+                        <div className="dropdown-item-text">
+                          <span className="dropdown-item-label">Dashboard</span>
+                        </div>
+                      </Link>
+                      <Link to="/my-profile" className="dropdown-item">
+                        <span className="dropdown-item-icon">
+                          <IoPersonOutline />
+                        </span>
+                        <div className="dropdown-item-text">
+                          <span className="dropdown-item-label">
+                            My Profile
+                          </span>
+                        </div>
+                      </Link>
+                      <Link to="/my-rewards" className="dropdown-item">
+                        <span className="dropdown-item-icon">
+                          <IoTrophyOutline />
+                        </span>
+                        <div className="dropdown-item-text">
+                          <span className="dropdown-item-label">
+                            My Rewards
+                          </span>
+                        </div>
+                      </Link>
+                    </div>
+                    <div className="dropdown-divider" />
+                    <button className="dropdown-logout" onClick={handleLogout}>
+                      <IoLogOutOutline />
+                      Sign Out
+                    </button>
+                  </div>
                 </div>
-              </div>
+              </>
             ) : (
               <div className="nav-auth">
                 <Link to="/signin" className="btn-login">
@@ -254,7 +310,9 @@ const Navbar = () => {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle navigation"
             >
-              <span className={`hamburger ${mobileMenuOpen ? "hamburger--active" : ""}`}>
+              <span
+                className={`hamburger ${mobileMenuOpen ? "hamburger--active" : ""}`}
+              >
                 <span />
                 <span />
                 <span />
@@ -271,7 +329,9 @@ const Navbar = () => {
       />
 
       {/* Mobile Drawer */}
-      <div className={`mobile-drawer ${mobileMenuOpen ? "mobile-drawer--open" : ""}`}>
+      <div
+        className={`mobile-drawer ${mobileMenuOpen ? "mobile-drawer--open" : ""}`}
+      >
         <div className="mobile-drawer-header">
           <Logo size="sm" />
           <button
@@ -284,6 +344,16 @@ const Navbar = () => {
         </div>
 
         <div className="mobile-drawer-content">
+          <Link
+            to="/"
+            className="mobile-link mobile-link--highlight"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <span className="mobile-link-icon">
+              <IoHomeOutline />
+            </span>
+            Home
+          </Link>
           {navMenus.map((menu) => (
             <div key={menu.key} className="mobile-section">
               <span className="mobile-section-title">{menu.label}</span>
@@ -305,7 +375,9 @@ const Navbar = () => {
             className="mobile-link mobile-link--highlight"
             onClick={() => setMobileMenuOpen(false)}
           >
-            <span className="mobile-link-icon"><IoFlashOutline /></span>
+            <span className="mobile-link-icon">
+              <IoFlashOutline />
+            </span>
             Rewards
           </Link>
         </div>
@@ -315,14 +387,20 @@ const Navbar = () => {
             <>
               <div className="mobile-user-info">
                 {user.photoURL ? (
-                  <img src={user.photoURL} alt="" className="mobile-user-avatar" />
+                  <img
+                    src={user.photoURL}
+                    alt=""
+                    className="mobile-user-avatar"
+                  />
                 ) : (
                   <span className="mobile-user-avatar mobile-user-initials">
                     {getInitials(user.displayName)}
                   </span>
                 )}
                 <div>
-                  <span className="mobile-user-name">{user.displayName || "User"}</span>
+                  <span className="mobile-user-name">
+                    {user.displayName || "User"}
+                  </span>
                   <span className="mobile-user-email">{user.email}</span>
                 </div>
               </div>
